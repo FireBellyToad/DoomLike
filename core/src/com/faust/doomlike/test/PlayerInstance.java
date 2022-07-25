@@ -51,8 +51,8 @@ public class PlayerInstance implements InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
 
-        int deltaX = (int) (MathUtils.sinDeg(angle) * 10);
-        int deltaY = (int) (MathUtils.cosDeg(angle) * 10);
+        int deltaX = (int) (MathUtils.sinDeg(angle) * 5);
+        int deltaY = (int) (MathUtils.cosDeg(angle) * 5);
 
         switch (keycode) {
             case Input.Keys.W:
@@ -77,11 +77,11 @@ public class PlayerInstance implements InputProcessor {
                 break;
             case Input.Keys.Q:
                 //rotate left
-                deltaAngle -= 4;
+                deltaAngle -= 2;
                 break;
             case Input.Keys.E:
                 //rotate right
-                deltaAngle += 4;
+                deltaAngle += 2;
                 break;
             case Input.Keys.R:
                 //rotate up
@@ -93,11 +93,11 @@ public class PlayerInstance implements InputProcessor {
                 break;
             case Input.Keys.T:
                 //fly up
-                deltaPosition.z += 4;
+                deltaPosition.z += 2;
                 break;
             case Input.Keys.G:
                 //fly down
-                deltaPosition.z -= 4;
+                deltaPosition.z -= 2;
                 break;
         }
 

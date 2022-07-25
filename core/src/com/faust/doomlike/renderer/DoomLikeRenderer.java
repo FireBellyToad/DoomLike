@@ -1,5 +1,6 @@
 package com.faust.doomlike.renderer;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,8 +18,8 @@ import com.faust.doomlike.test.PlayerInstance;
  */
 public class DoomLikeRenderer {
 
-    private static final int FIELD_OF_VIEW = 200;
-    private static final int VERTICAL_LOOK_SCALE_FACTOR = 32;
+    private static final float FIELD_OF_VIEW = 200;
+    private static final float VERTICAL_LOOK_SCALE_FACTOR = 32;
 
     private final SpriteBatch batch;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
@@ -53,7 +54,8 @@ public class DoomLikeRenderer {
 
         bottomLeftPoint.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
         topLeftPoint.x = bottomLeftPoint.x;
-        bottomLeftPoint.y = y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin;
+        //Must be not 0
+        bottomLeftPoint.y = Math.max(1,y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin);
         topLeftPoint.y = bottomLeftPoint.y;
         // Use vertical looking angle to offset Z
         bottomLeftPoint.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomLeftPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
@@ -61,11 +63,25 @@ public class DoomLikeRenderer {
 
         bottomRightPoint.x = x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin;
         topRightPoint.x = bottomRightPoint.x;
-        bottomRightPoint.y = y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin;
+        //Must be not 0
+        bottomRightPoint.y = Math.max(1,y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin);
         topRightPoint.y = bottomRightPoint.y;
         // Use vertical looking angle to offset Z
         bottomRightPoint.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomRightPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
         topRightPoint.z = 40 + bottomRightPoint.z;
+
+        // If wall is behind player
+        if(bottomLeftPoint.y < 0 && bottomRightPoint.y <1)
+            return;
+        else if(bottomLeftPoint.y < 0){
+            clipBehindPlayer(bottomLeftPoint, bottomRightPoint);
+            clipBehindPlayer(topLeftPoint, topRightPoint);
+
+        } else if(bottomRightPoint.y < 0) {
+            clipBehindPlayer(bottomRightPoint, bottomLeftPoint);
+            clipBehindPlayer(topRightPoint, topLeftPoint);
+        }
+
 
         // Calculate X and Y screen position, scaling from screen origin
         bottomLeftPoint.x = bottomLeftPoint.x * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
@@ -85,7 +101,6 @@ public class DoomLikeRenderer {
 
     }
 
-
     /**
      * draw a line of vert
      *
@@ -93,29 +108,58 @@ public class DoomLikeRenderer {
      */
     private void drawWall(WallData wallData) {
 
-        int bottomPointYDistance = (int) (wallData.getBottomRightPoint().y - wallData.getBottomLeftPoint().y);
-        int xDistance = (int) Math.max(1, (wallData.getBottomRightPoint().x - wallData.getBottomLeftPoint().x));
-        int topPointYDistance = (int) (wallData.getTopRightPoint().y - wallData.getTopLeftPoint().y);
-        int xStartingPosition = (int) wallData.getBottomLeftPoint().x;
+        Vector3 bottomLeftPoint = wallData.getBottomLeftPoint();
+        Vector3 bottomRightPoint = wallData.getBottomRightPoint();
+
+        float bottomPointYDistance = (bottomRightPoint.y - bottomLeftPoint.y);
+        float xDistance = Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x));
+        float topPointYDistance =  (wallData.getTopRightPoint().y - wallData.getTopLeftPoint().y);
+        float xStartingPosition =  bottomLeftPoint.x;
+
+        //Clip x
+        bottomLeftPoint.x = MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH-1);
+        bottomRightPoint.x = MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH-1);
 
         //Draw x vertical lines
-        for (int xToRender = (int) wallData.getBottomLeftPoint().x; xToRender < wallData.getBottomRightPoint().x; xToRender++) {
+        for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
             // Get the Y start and end point (0.5 is used for rounding)
-            int yBottomPoint = (int) (bottomPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + wallData.getBottomLeftPoint().y);
-            int yTopPoint = (int) (topPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + wallData.getTopLeftPoint().y);
+            float yBottomPoint = (float) (bottomPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + bottomLeftPoint.y);
+            float yTopPoint = (float) (topPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + wallData.getTopLeftPoint().y);
 
-            drawPixel(xToRender, yBottomPoint, yellow);
-            drawPixel(xToRender, yTopPoint, yellow);
+            //Clip Y
+            yBottomPoint = MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT-1);
+            yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT-1);
+
+//            // Draw pixel by pixel (HEAVY)
+//            drawPixel(xToRender, yBottomPoint, yellow);
+//            drawPixel(xToRender, yTopPoint, yellow);
+//
+//            // draw vertical line to fill the wall
+//            for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
+//                drawPixel(xToRender, yToRender, yellow);
+//
+//            }
 
             // draw vertical line to fill the wall
-            for (int yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
-                drawPixel(xToRender, yToRender, yellow);
-
-            }
-            // draw vertical line to fill the wall
-//            drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, yellow);
+            drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, yellow);
 
         }
+    }
+
+    /**
+     *
+     * @param pointA
+     * @param pointB
+     */
+    private void clipBehindPlayer(Vector3 pointA, Vector3 pointB) {
+
+        float distanceFromAToB = Math.max(1, pointA.y-pointB.y);
+        float intersectionFactor = pointA.y / distanceFromAToB;
+
+        pointA.x = pointA.x + intersectionFactor*(pointB.x-pointA.x);
+        pointA.y = Math.max(1, pointB.y + intersectionFactor*(pointB.y-pointA.y));
+        pointA.z = pointB.z + intersectionFactor*(pointB.z-pointB.z);
+
     }
 
     /**
