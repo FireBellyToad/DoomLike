@@ -7,9 +7,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.faust.doomlike.DoomLikeTestGame;
-import com.faust.doomlike.renderer.data.WallData;
+import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.test.PlayerInstance;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -39,7 +40,7 @@ public class DoomLikeRenderer {
         shapeRendererTexture = new Texture(pixmap); //remember to dispose of later
         pixmap.dispose();
 
-        this.shapeDrawer = new ShapeDrawer(batch,new TextureRegion(shapeRendererTexture, 0, 0, 1, 1));
+        this.shapeDrawer = new ShapeDrawer(batch, new TextureRegion(shapeRendererTexture, 0, 0, 1, 1));
     }
 
     public void draw3d(PlayerInstance playerInstance) {
@@ -49,24 +50,24 @@ public class DoomLikeRenderer {
         final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
         final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
 
-        // Place the wall in world relative to player position
-        final float x1 = 40 - playerInstance.getPosition().x;
-        final float y1 = 10 - playerInstance.getPosition().y;
-        final float x2 = 40 - playerInstance.getPosition().x;
-        final float y2 = 290 - playerInstance.getPosition().y;
-
         //FIXME should not be temp!
-        WallData tempWallData = new WallData();
+        WallData tempWallData = new WallData(40,10,40,290,yellow);
+        // Place the wall in world relative to player position
+        final float x1 = tempWallData.getBottomLeftPoint().x - playerInstance.getPosition().x;
+        final float y1 = tempWallData.getBottomLeftPoint().y - playerInstance.getPosition().y;
+        final float x2 = tempWallData.getBottomRightPoint().x - playerInstance.getPosition().x;
+        final float y2 = tempWallData.getBottomRightPoint().y - playerInstance.getPosition().y;
+
         // Calculate X, Y (depth) and Z (height) world position for both points, from origin
-        Vector3 bottomLeftPoint = tempWallData.getBottomLeftPoint();
-        Vector3 bottomRightPoint = tempWallData.getBottomRightPoint();
-        Vector3 topLeftPoint = tempWallData.getTopLeftPoint();
-        Vector3 topRightPoint = tempWallData.getTopRightPoint();
+        Vector3 bottomLeftPoint = new Vector3();
+        Vector3 bottomRightPoint = new Vector3();
+        Vector3 topLeftPoint = new Vector3();
+        Vector3 topRightPoint = new Vector3();
 
         bottomLeftPoint.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
         topLeftPoint.x = bottomLeftPoint.x;
         //Must be not 0
-        bottomLeftPoint.y = Math.max(1,y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin);
+        bottomLeftPoint.y = Math.max(1, y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin);
         topLeftPoint.y = bottomLeftPoint.y;
         // Use vertical looking angle to offset Z
         bottomLeftPoint.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomLeftPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
@@ -75,20 +76,20 @@ public class DoomLikeRenderer {
         bottomRightPoint.x = x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin;
         topRightPoint.x = bottomRightPoint.x;
         //Must be not 0
-        bottomRightPoint.y = Math.max(1,y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin);
+        bottomRightPoint.y = Math.max(1, y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin);
         topRightPoint.y = bottomRightPoint.y;
         // Use vertical looking angle to offset Z
         bottomRightPoint.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomRightPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
         topRightPoint.z = 40 + bottomRightPoint.z;
 
         // If wall is behind player
-        if(bottomLeftPoint.y < 0 && bottomRightPoint.y <1)
+        if (bottomLeftPoint.y < 0 && bottomRightPoint.y < 1)
             return;
-        else if(bottomLeftPoint.y < 0){
+        else if (bottomLeftPoint.y < 0) {
             clipBehindPlayer(bottomLeftPoint, bottomRightPoint);
             clipBehindPlayer(topLeftPoint, topRightPoint);
 
-        } else if(bottomRightPoint.y < 0) {
+        } else if (bottomRightPoint.y < 0) {
             clipBehindPlayer(bottomRightPoint, bottomLeftPoint);
             clipBehindPlayer(topRightPoint, topLeftPoint);
         }
@@ -108,39 +109,39 @@ public class DoomLikeRenderer {
         topRightPoint.y = topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
 
         //Draw points if on screen
-        drawWall(tempWallData);
+        drawWall(bottomLeftPoint, bottomRightPoint, topLeftPoint, topRightPoint);
 
     }
 
     /**
      * draw a line of vert
      *
-     * @param wallData
+     * @param bottomLeftPoint
+     * @param bottomRightPoint
+     * @param topLeftPoint
+     * @param topRightPoint
      */
-    private void drawWall(WallData wallData) {
-
-        Vector3 bottomLeftPoint = wallData.getBottomLeftPoint();
-        Vector3 bottomRightPoint = wallData.getBottomRightPoint();
+    private void drawWall(Vector3 bottomLeftPoint, Vector3 bottomRightPoint, Vector3 topLeftPoint, Vector3 topRightPoint) {
 
         float bottomPointYDistance = (bottomRightPoint.y - bottomLeftPoint.y);
         float xDistance = Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x));
-        float topPointYDistance =  (wallData.getTopRightPoint().y - wallData.getTopLeftPoint().y);
-        float xStartingPosition =  bottomLeftPoint.x;
+        float topPointYDistance = (topRightPoint.y - topLeftPoint.y);
+        float xStartingPosition = bottomLeftPoint.x;
 
         //Clip x
-        bottomLeftPoint.x = MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH-1);
-        bottomRightPoint.x = MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH-1);
+        bottomLeftPoint.x = MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH - 1);
+        bottomRightPoint.x = MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH - 1);
 
         batch.begin();
         //Draw x vertical lines
         for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
             // Get the Y start and end point (0.5 is used for rounding)
             float yBottomPoint = (float) (bottomPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + bottomLeftPoint.y);
-            float yTopPoint = (float) (topPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + wallData.getTopLeftPoint().y);
+            float yTopPoint = (float) (topPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + topLeftPoint.y);
 
             //Clip Y
-            yBottomPoint = MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT-1);
-            yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT-2);
+            yBottomPoint = MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT - 1);
+            yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT - 2);
 
 //            // Draw pixel by pixel (HEAVY)
             drawPixel(xToRender, yBottomPoint, yellow);
@@ -161,33 +162,31 @@ public class DoomLikeRenderer {
     }
 
     /**
-     *
      * @param pointA
      * @param pointB
      */
     private void clipBehindPlayer(Vector3 pointA, Vector3 pointB) {
 
-        float distanceFromAToB = Math.max(1, pointA.y-pointB.y);
+        float distanceFromAToB = Math.max(1, pointA.y - pointB.y);
         float intersectionFactor = pointA.y / distanceFromAToB;
 
-        pointA.x = pointA.x + intersectionFactor*(pointB.x-pointA.x);
-        pointA.y = Math.max(1, pointB.y + intersectionFactor*(pointB.y-pointA.y));
-        pointA.z = pointB.z + intersectionFactor*(pointB.z-pointB.z);
+        pointA.x = pointA.x + intersectionFactor * (pointB.x - pointA.x);
+        pointA.y = Math.max(1, pointB.y + intersectionFactor * (pointB.y - pointA.y));
+        pointA.z = pointB.z + intersectionFactor * (pointB.z - pointB.z);
 
     }
 
     /**
-     *
      * @param x1
      * @param y1
      * @param x2
      * @param y2
      * @param pixelColor
      */
-    private void drawLine(float x1, float y1,float x2, float y2, Color pixelColor) {
+    private void drawLine(float x1, float y1, float x2, float y2, Color pixelColor) {
         batch.begin();
         shapeDrawer.setColor(pixelColor);
-        shapeDrawer.line(x1,y1,x2,y2,1);
+        shapeDrawer.line(x1, y1, x2, y2, 1);
         batch.end();
 
     }

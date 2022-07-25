@@ -7,6 +7,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.faust.doomlike.data.MapData;
+import com.faust.doomlike.data.SectorData;
+import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.renderer.DoomLikeRenderer;
 import com.faust.doomlike.test.PlayerInstance;
 
@@ -21,12 +24,13 @@ public class DoomLikeTestGame extends ApplicationAdapter {
 	public static final int GAME_HEIGHT = 120;
 	public static final int SCALE_FACTOR = 4;
 
-	SpriteBatch batch;
-	Texture img;
+	private SpriteBatch batch;
+	private Texture img;
 
-	PlayerInstance playerInstance;
-	DoomLikeRenderer renderer;
-	
+	private PlayerInstance playerInstance;
+	private DoomLikeRenderer renderer;
+	private MapData testMap;
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
@@ -39,6 +43,8 @@ public class DoomLikeTestGame extends ApplicationAdapter {
 		camera.setToOrtho(false, GAME_WIDTH, GAME_HEIGHT);
 
 		renderer = new DoomLikeRenderer(batch, camera);
+
+		testMap = new MapData();
 	}
 
 	@Override
