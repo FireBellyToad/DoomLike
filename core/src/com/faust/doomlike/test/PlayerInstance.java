@@ -18,7 +18,7 @@ public class PlayerInstance implements InputProcessor {
     private int angle = 0;
     private int lookUpDown = 0;
 
-    private final Vector3 deltaPosition = new Vector3(0, 0, 0);
+    private final Vector3 deltaPosition = Vector3.Zero.cpy();
     private int deltaAngle = 0;
     private int deltaLookUpDown = 0;
 
@@ -67,13 +67,13 @@ public class PlayerInstance implements InputProcessor {
                 break;
             case Input.Keys.A:
                 //Strafe left
-                deltaPosition.x += deltaY;
-                deltaPosition.y -= deltaX;
+                deltaPosition.x -= deltaY;
+                deltaPosition.y += deltaX;
                 break;
             case Input.Keys.D:
                 //Strafe right
-                deltaPosition.x -= deltaY;
-                deltaPosition.y += deltaX;
+                deltaPosition.x += deltaY;
+                deltaPosition.y -= deltaX;
                 break;
             case Input.Keys.Q:
                 //rotate left
@@ -85,11 +85,11 @@ public class PlayerInstance implements InputProcessor {
                 break;
             case Input.Keys.R:
                 //rotate up
-                deltaLookUpDown += 1;
+                deltaLookUpDown -= 1;
                 break;
             case Input.Keys.F:
                 //rotate down
-                deltaLookUpDown -= 1;
+                deltaLookUpDown += 1;
                 break;
             case Input.Keys.T:
                 //fly up
