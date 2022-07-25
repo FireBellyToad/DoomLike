@@ -32,7 +32,6 @@ public class PlayerInstance implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        Gdx.app.log("DEBUG", "Key down: " + Input.Keys.toString(keycode));
 
         int deltaX = (int) (MathUtils.sinDeg(angle) * 10);
         int deltaY = (int) (MathUtils.cosDeg(angle) * 10);
@@ -82,11 +81,11 @@ public class PlayerInstance implements InputProcessor {
                 break;
             case Input.Keys.T:
                 //fly up
-                position.z -= 4;
+                position.z += 4;
                 break;
             case Input.Keys.G:
                 //fly down
-                position.z += 4;
+                position.z -= 4;
                 break;
         }
 

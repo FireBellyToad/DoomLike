@@ -17,6 +17,8 @@ import com.faust.doomlike.test.PlayerInstance;
 public class DoomLikeRenderer {
 
     private static final int FIELD_OF_VIEW = 200;
+    private static final int VERTICAL_LOOK_SCALE_FACTOR = 32;
+
     private final SpriteBatch batch;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
     private static final Color yellow = new Color(0xffff00ff);
@@ -34,32 +36,35 @@ public class DoomLikeRenderer {
         final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
         final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
 
-        // offset bottom 2 points bt player
+        // Place the wall in world relative to player position
         final float x1 = 40 - playerInstance.getPosition().x;
         final float y1 = 10 - playerInstance.getPosition().y;
         final float x2 = 40 - playerInstance.getPosition().x;
         final float y2 = 290 - playerInstance.getPosition().y;
 
 
-        // Calculate X, Y (depth) and Z (height) world position for both points
+        // Calculate X, Y (depth) and Z (height) world position for both points, from origin
         Vector3 pointsToAdd = new Vector3();
         Vector3 otherPointsToAdd = new Vector3();
 
         pointsToAdd.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
         pointsToAdd.y = y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin;
-        pointsToAdd.z = 0 - playerInstance.getPosition().z;
+        // Use vertical looking angle to offset Z
+        pointsToAdd.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * pointsToAdd.y) / VERTICAL_LOOK_SCALE_FACTOR);
 
         otherPointsToAdd.x = x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin;
         otherPointsToAdd.y = y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin;
-        otherPointsToAdd.z = 0 - playerInstance.getPosition().z;
+        // Use vertical looking angle to offset Z
+        otherPointsToAdd.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * otherPointsToAdd.y) / VERTICAL_LOOK_SCALE_FACTOR);
 
-        // Calculate X and Y screen position
+        // Calculate X and Y screen position, scaling from screen origin
         pointsToAdd.x = pointsToAdd.x * FIELD_OF_VIEW / pointsToAdd.y + DoomLikeTestGame.GAME_WIDTH / 2;
         pointsToAdd.y = pointsToAdd.z * FIELD_OF_VIEW / pointsToAdd.y + DoomLikeTestGame.GAME_HEIGHT / 2;
 
         otherPointsToAdd.x = otherPointsToAdd.x * FIELD_OF_VIEW / otherPointsToAdd.y + DoomLikeTestGame.GAME_WIDTH / 2;
         otherPointsToAdd.y = otherPointsToAdd.z * FIELD_OF_VIEW / otherPointsToAdd.y + DoomLikeTestGame.GAME_HEIGHT / 2;
 
+        //Draw points if on screen
         if (pointsToAdd.x > 0 && pointsToAdd.x < DoomLikeTestGame.GAME_WIDTH && pointsToAdd.y > 0 && pointsToAdd.y < DoomLikeTestGame.GAME_HEIGHT)
             drawPixel(pointsToAdd.x, pointsToAdd.y);
         if (otherPointsToAdd.x > 0 && otherPointsToAdd.x < DoomLikeTestGame.GAME_WIDTH && otherPointsToAdd.y > 0 && otherPointsToAdd.y < DoomLikeTestGame.GAME_HEIGHT)
@@ -67,6 +72,12 @@ public class DoomLikeRenderer {
 
     }
 
+    /**
+     * Draw pixel
+     *
+     * @param x
+     * @param y
+     */
     private void drawPixel(float x, float y) {
         batch.begin();
         shapeRenderer.setColor(yellow);
