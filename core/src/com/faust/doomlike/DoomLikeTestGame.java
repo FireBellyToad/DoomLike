@@ -96,6 +96,10 @@ public class DoomLikeTestGame extends ApplicationAdapter {
 			this.getWalls().add(new WallData(0,96,0,64, darkBlue));
 		}});
 
+		testMapData.getSectors().forEach(s ->{
+			Gdx.app.log("DEBUG", s.getSectorUuid());
+		});
+
 		testMap = new MapWrapper(testMapData);
 
 	}

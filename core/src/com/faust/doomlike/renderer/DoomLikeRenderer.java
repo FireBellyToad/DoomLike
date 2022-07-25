@@ -55,6 +55,7 @@ public class DoomLikeRenderer {
         for (SectorWrapper sector : map.getSectors()) {
             //Clear distance
             sector.setDepth(0);
+            sector.getSurfaceYforXMap().clear();
 
             if (playerInstance.getPosition().z < sector.getBottomHeight()) {
                 sector.setSurfaceToShow(SectorWrapper.SurfaceShownEnum.BOTTOM);
@@ -149,10 +150,10 @@ public class DoomLikeRenderer {
             topRightPoint.y = topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
 
             //Draw points if on screen
-            int bottomPointYDistance = (int) (bottomRightPoint.y - bottomLeftPoint.y);
-            int xDistance = (int) Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x));
-            int topPointYDistance = (int) (topRightPoint.y - topLeftPoint.y);
-            int xStartingPosition = (int) bottomLeftPoint.x;
+            float bottomPointYDistance = (bottomRightPoint.y - bottomLeftPoint.y);
+            float xDistance = Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x));
+            float topPointYDistance = (topRightPoint.y - topLeftPoint.y);
+            float xStartingPosition =  bottomLeftPoint.x;
 
             //Clip x
             bottomLeftPoint.x = MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH);
@@ -160,33 +161,33 @@ public class DoomLikeRenderer {
 
             batch.begin();
             //Draw x vertical lines
-            for (int xToRender = (int) bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
+            for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
                 // Get the Y start and end point (0.5 is used for rounding)
-                int yBottomPoint = (int) (bottomPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + bottomLeftPoint.y);
-                int yTopPoint = (int) (topPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + topLeftPoint.y);
+                float yBottomPoint =  (bottomPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + bottomLeftPoint.y);
+                float yTopPoint =  (topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y);
 
                 //Clip Y
                 yBottomPoint = MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT);
                 yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT);
 
 
+                int approx = MathUtils.floor(xToRender);
                 //Store surface information
                 if (backfaceCulling) {
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-                        sector.getSurfaceYforXMap().put(xToRender, yBottomPoint);
+                        sector.getSurfaceYforXMap().put(approx, yBottomPoint);
                         continue;
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-                        sector.getSurfaceYforXMap().put(xToRender, yTopPoint);
+                        sector.getSurfaceYforXMap().put(approx, yTopPoint);
                         continue;
                     }
-                } else if (sector.getSurfaceYforXMap().containsKey(xToRender)) {
+                } else if (sector.getSurfaceYforXMap().containsKey(approx)) {
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-                        drawLine(xToRender, sector.getSurfaceYforXMap().get(xToRender), xToRender, yTopPoint, sector.getBottomColor());
+                        drawLine(xToRender, sector.getSurfaceYforXMap().get(approx), xToRender, yTopPoint, sector.getBottomColor());
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-
-                        drawLine(xToRender, yBottomPoint, xToRender, sector.getSurfaceYforXMap().get(xToRender), sector.getTopColor());
+                        drawLine(xToRender, yBottomPoint, xToRender, sector.getSurfaceYforXMap().get(approx), sector.getTopColor());
                     }
                 }
 
@@ -196,7 +197,7 @@ public class DoomLikeRenderer {
 //                }
 
                 // draw vertical line to fill the wall
-                drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, wall.getColor());
+                drawLine(xToRender,  yBottomPoint, xToRender,  yTopPoint, wall.getColor());
 
             }
 
@@ -212,8 +213,8 @@ public class DoomLikeRenderer {
      */
     private void clipBehindPlayer(Vector3 pointA, Vector3 pointB) {
 
-        int distanceFromAToB = (int) Math.max(1, pointA.y - pointB.y);
-        int intersectionFactor = (int) (pointA.y / distanceFromAToB);
+        float distanceFromAToB = Math.max(1, pointA.y - pointB.y);
+        float intersectionFactor = (pointA.y / distanceFromAToB);
 
         pointA.x = pointA.x + intersectionFactor * (pointB.x - pointA.x);
         pointA.y = Math.max(1, pointB.y + intersectionFactor * (pointB.y - pointA.y));
@@ -228,7 +229,7 @@ public class DoomLikeRenderer {
      * @param y2
      * @param pixelColor
      */
-    private void drawLine(int x1, int y1, int x2, int y2, Color pixelColor) {
+    private void drawLine(float x1, float y1, float x2, float y2, Color pixelColor) {
         shapeDrawer.setColor(pixelColor);
         shapeDrawer.line(x1, y1, x2, y2, 1);
 
@@ -241,7 +242,7 @@ public class DoomLikeRenderer {
      * @param y
      * @param pixelColor
      */
-    private void drawPixel(int x, int y, Color pixelColor) {
+    private void drawPixel(float x, float y, Color pixelColor) {
         shapeDrawer.setColor(pixelColor);
         shapeDrawer.rectangle(x, y, 1, 1);
 

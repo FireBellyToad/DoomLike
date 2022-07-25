@@ -20,7 +20,7 @@ public class SectorWrapper {
     }
 
     private final SectorData sectorData;
-    private final Map<Integer,Integer> surfaceYforXMap =new HashMap<>();
+    private final Map<Integer,Float> surfaceYforXMap =new HashMap<>();
     private SurfaceShownEnum surfaceToShow = SurfaceShownEnum.NONE;
     private float depth;
 
@@ -28,7 +28,7 @@ public class SectorWrapper {
         this.sectorData = sectorData;
     }
 
-    public Map<Integer,Integer>  getSurfaceYforXMap() {
+    public Map<Integer,Float>  getSurfaceYforXMap() {
         return surfaceYforXMap;
     }
 
@@ -66,5 +66,9 @@ public class SectorWrapper {
 
     public Color getBottomColor() {
         return sectorData.getBottomColor();
+    }
+
+    public String getSectorUuid() {
+        return this.sectorData.getSectorUuid();
     }
 }
