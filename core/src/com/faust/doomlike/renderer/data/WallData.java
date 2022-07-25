@@ -13,17 +13,24 @@ import java.util.List;
  */
 public class WallData {
 
-    final List<Vector3> points = new ArrayList<Vector3>();
+    final Vector3 bottomLeftPoint = new Vector3();
+    final Vector3 bottomRightPoint = new Vector3();
+    final Vector3 topLefttPoint = new Vector3();
+    final Vector3 topRightPoint = new Vector3();
 
-    public List<Vector3> getPoints() {
-        return points;
+    public Vector3 getBottomLeftPoint() {
+        return bottomLeftPoint;
     }
 
-    public void addPoints(Vector3 pointsToAdd) {
-        if (points.size() == 4) {
-            throw new GdxRuntimeException("points should not be more than 4!");
+    public Vector3 getBottomRightPoint() {
+        return bottomRightPoint;
+    }
 
-        }
-        points.add(pointsToAdd);
+    public Vector3 getTopLefttPoint() {
+        return topLefttPoint;
+    }
+
+    public Vector3 getTopRightPoint() {
+        return topRightPoint;
     }
 }

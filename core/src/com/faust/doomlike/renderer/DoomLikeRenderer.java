@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.faust.doomlike.DoomLikeTestGame;
+import com.faust.doomlike.renderer.data.WallData;
 import com.faust.doomlike.test.PlayerInstance;
 
 /**
@@ -42,10 +43,11 @@ public class DoomLikeRenderer {
         final float x2 = 40 - playerInstance.getPosition().x;
         final float y2 = 290 - playerInstance.getPosition().y;
 
-
+        //FIXME should not be temp!
+        WallData tempWallData = new WallData();
         // Calculate X, Y (depth) and Z (height) world position for both points, from origin
-        Vector3 pointsToAdd = new Vector3();
-        Vector3 otherPointsToAdd = new Vector3();
+        Vector3 pointsToAdd = tempWallData.getBottomLeftPoint();
+        Vector3 otherPointsToAdd = tempWallData.getBottomRightPoint();
 
         pointsToAdd.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
         pointsToAdd.y = y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin;
@@ -69,6 +71,16 @@ public class DoomLikeRenderer {
             drawPixel(pointsToAdd.x, pointsToAdd.y);
         if (otherPointsToAdd.x > 0 && otherPointsToAdd.x < DoomLikeTestGame.GAME_WIDTH && otherPointsToAdd.y > 0 && otherPointsToAdd.y < DoomLikeTestGame.GAME_HEIGHT)
             drawPixel(otherPointsToAdd.x, otherPointsToAdd.y);
+
+    }
+
+    /**
+     *
+     * @param wallData
+     */
+    private void drawWall(WallData wallData){
+        wallData.getBottomRightPoint();
+        wallData.getBottomLeftPoint();
 
     }
 
