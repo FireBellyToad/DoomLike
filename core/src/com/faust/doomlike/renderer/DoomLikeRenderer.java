@@ -46,41 +46,94 @@ public class DoomLikeRenderer {
         //FIXME should not be temp!
         WallData tempWallData = new WallData();
         // Calculate X, Y (depth) and Z (height) world position for both points, from origin
-        Vector3 pointsToAdd = tempWallData.getBottomLeftPoint();
-        Vector3 otherPointsToAdd = tempWallData.getBottomRightPoint();
+        Vector3 bottomLeftPoint = tempWallData.getBottomLeftPoint();
+        Vector3 bottomRightPoint = tempWallData.getBottomRightPoint();
+        Vector3 topLeftPoint = tempWallData.getTopLeftPoint();
+        Vector3 topRightPoint = tempWallData.getTopRightPoint();
 
-        pointsToAdd.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
-        pointsToAdd.y = y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin;
+        bottomLeftPoint.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
+        topLeftPoint.x = bottomLeftPoint.x;
+        bottomLeftPoint.y = y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin;
+        topLeftPoint.y = bottomLeftPoint.y;
         // Use vertical looking angle to offset Z
-        pointsToAdd.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * pointsToAdd.y) / VERTICAL_LOOK_SCALE_FACTOR);
+        bottomLeftPoint.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomLeftPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
+        topLeftPoint.z = 40 + bottomLeftPoint.z;
 
-        otherPointsToAdd.x = x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin;
-        otherPointsToAdd.y = y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin;
+        bottomRightPoint.x = x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin;
+        topRightPoint.x = bottomRightPoint.x;
+        bottomRightPoint.y = y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin;
+        topRightPoint.y = bottomRightPoint.y;
         // Use vertical looking angle to offset Z
-        otherPointsToAdd.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * otherPointsToAdd.y) / VERTICAL_LOOK_SCALE_FACTOR);
+        bottomRightPoint.z = 0 - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomRightPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
+        topRightPoint.z = 40 + bottomRightPoint.z;
 
         // Calculate X and Y screen position, scaling from screen origin
-        pointsToAdd.x = pointsToAdd.x * FIELD_OF_VIEW / pointsToAdd.y + DoomLikeTestGame.GAME_WIDTH / 2;
-        pointsToAdd.y = pointsToAdd.z * FIELD_OF_VIEW / pointsToAdd.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+        bottomLeftPoint.x = bottomLeftPoint.x * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
+        bottomLeftPoint.y = bottomLeftPoint.z * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
 
-        otherPointsToAdd.x = otherPointsToAdd.x * FIELD_OF_VIEW / otherPointsToAdd.y + DoomLikeTestGame.GAME_WIDTH / 2;
-        otherPointsToAdd.y = otherPointsToAdd.z * FIELD_OF_VIEW / otherPointsToAdd.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+        bottomRightPoint.x = bottomRightPoint.x * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
+        bottomRightPoint.y = bottomRightPoint.z * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+
+        topLeftPoint.x = topLeftPoint.x * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
+        topLeftPoint.y = topLeftPoint.z * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+
+        topRightPoint.x = topRightPoint.x * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
+        topRightPoint.y = topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
 
         //Draw points if on screen
-        if (pointsToAdd.x > 0 && pointsToAdd.x < DoomLikeTestGame.GAME_WIDTH && pointsToAdd.y > 0 && pointsToAdd.y < DoomLikeTestGame.GAME_HEIGHT)
-            drawPixel(pointsToAdd.x, pointsToAdd.y);
-        if (otherPointsToAdd.x > 0 && otherPointsToAdd.x < DoomLikeTestGame.GAME_WIDTH && otherPointsToAdd.y > 0 && otherPointsToAdd.y < DoomLikeTestGame.GAME_HEIGHT)
-            drawPixel(otherPointsToAdd.x, otherPointsToAdd.y);
+        drawWall(tempWallData);
 
+    }
+
+
+    /**
+     * draw a line of vert
+     *
+     * @param wallData
+     */
+    private void drawWall(WallData wallData) {
+
+        int bottomPointYDistance = (int) (wallData.getBottomRightPoint().y - wallData.getBottomLeftPoint().y);
+        int xDistance = (int) Math.max(1, (wallData.getBottomRightPoint().x - wallData.getBottomLeftPoint().x));
+        int topPointYDistance = (int) (wallData.getTopRightPoint().y - wallData.getTopLeftPoint().y);
+        int xStartingPosition = (int) wallData.getBottomLeftPoint().x;
+
+        //Draw x vertical lines
+        for (int xToRender = (int) wallData.getBottomLeftPoint().x; xToRender < wallData.getBottomRightPoint().x; xToRender++) {
+            // Get the Y start and end point (0.5 is used for rounding)
+            int yBottomPoint = (int) (bottomPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + wallData.getBottomLeftPoint().y);
+            int yTopPoint = (int) (topPointYDistance * (xToRender - xStartingPosition + 0.5) / xDistance + wallData.getTopLeftPoint().y);
+
+            drawPixel(xToRender, yBottomPoint, yellow);
+            drawPixel(xToRender, yTopPoint, yellow);
+
+            // draw vertical line to fill the wall
+            for (int yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
+                drawPixel(xToRender, yToRender, yellow);
+
+            }
+            // draw vertical line to fill the wall
+//            drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, yellow);
+
+        }
     }
 
     /**
      *
-     * @param wallData
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param pixelColor
      */
-    private void drawWall(WallData wallData){
-        wallData.getBottomRightPoint();
-        wallData.getBottomLeftPoint();
+    private void drawLine(float x1, float y1,float x2, float y2, Color pixelColor) {
+        batch.begin();
+        shapeRenderer.setColor(pixelColor);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.rectLine(x1,y1,x2,y2,1);
+        shapeRenderer.end();
+        batch.end();
 
     }
 
@@ -89,10 +142,11 @@ public class DoomLikeRenderer {
      *
      * @param x
      * @param y
+     * @param pixelColor
      */
-    private void drawPixel(float x, float y) {
+    private void drawPixel(float x, float y, Color pixelColor) {
         batch.begin();
-        shapeRenderer.setColor(yellow);
+        shapeRenderer.setColor(pixelColor);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.rect(x, y, 1, 1);

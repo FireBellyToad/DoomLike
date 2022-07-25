@@ -18,6 +18,24 @@ public class PlayerInstance implements InputProcessor {
     private int angle = 0;
     private int lookUpDown = 0;
 
+    private final Vector3 deltaPosition = new Vector3(0, 0, 0);
+    private int deltaAngle = 0;
+    private int deltaLookUpDown = 0;
+
+    public void doLogic(){
+
+        position.add(deltaPosition);
+        angle += deltaAngle;
+
+        if (angle < 0) {
+            angle += 360;
+        } else if (angle > 359) {
+            angle -= 360;
+        }
+
+        lookUpDown += deltaLookUpDown;
+    }
+
     public Vector3 getPosition() {
         return position;
     }
@@ -39,53 +57,47 @@ public class PlayerInstance implements InputProcessor {
         switch (keycode) {
             case Input.Keys.W:
                 //Move forward
-                position.x += deltaX;
-                position.y += deltaY;
+                deltaPosition.x += deltaX;
+                deltaPosition.y += deltaY;
                 break;
             case Input.Keys.S:
                 //Move backward
-                position.x -= deltaX;
-                position.y -= deltaY;
+                deltaPosition.x -= deltaX;
+                deltaPosition.y -= deltaY;
                 break;
             case Input.Keys.A:
                 //Strafe left
-                position.x += deltaY;
-                position.y -= deltaX;
+                deltaPosition.x += deltaY;
+                deltaPosition.y -= deltaX;
                 break;
             case Input.Keys.D:
                 //Strafe right
-                position.x -= deltaY;
-                position.y += deltaX;
+                deltaPosition.x -= deltaY;
+                deltaPosition.y += deltaX;
                 break;
             case Input.Keys.Q:
                 //rotate left
-                angle -= 4;
-                if (angle < 0) {
-                    angle += 360;
-                }
+                deltaAngle -= 4;
                 break;
             case Input.Keys.E:
                 //rotate right
-                angle += 4;
-                if (angle > 359) {
-                    angle -= 360;
-                }
+                deltaAngle += 4;
                 break;
             case Input.Keys.R:
                 //rotate up
-                lookUpDown += 1;
+                deltaLookUpDown += 1;
                 break;
             case Input.Keys.F:
                 //rotate down
-                lookUpDown -= 1;
+                deltaLookUpDown -= 1;
                 break;
             case Input.Keys.T:
                 //fly up
-                position.z += 4;
+                deltaPosition.z += 4;
                 break;
             case Input.Keys.G:
                 //fly down
-                position.z -= 4;
+                deltaPosition.z -= 4;
                 break;
         }
 
@@ -97,14 +109,29 @@ public class PlayerInstance implements InputProcessor {
 
         switch (keycode) {
             case Input.Keys.W:
-                break;
             case Input.Keys.S:
-                break;
             case Input.Keys.A:
-                break;
             case Input.Keys.D:
+                //Move forward
+                deltaPosition.x = 0;
+                deltaPosition.y = 0;
+                break;
+            case Input.Keys.Q:
+            case Input.Keys.E:
+                //rotate right
+                deltaAngle = 0;
+                break;
+            case Input.Keys.R:
+            case Input.Keys.F:
+                //rotate down
+                deltaLookUpDown = 0;
+                break;
+            case Input.Keys.T:
+            case Input.Keys.G:
+                deltaPosition.z = 0;
                 break;
         }
+
 
         return false;
     }
