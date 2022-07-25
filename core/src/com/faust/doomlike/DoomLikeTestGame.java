@@ -29,14 +29,14 @@ public class DoomLikeTestGame extends ApplicationAdapter {
 	private DoomLikeRenderer renderer;
 	private MapWrapper testMap;
 
-	private Color yellow = new Color(0xffff00ff);
-	private Color darkYellow = new Color(0xaaaa00ff);
-	private Color red = new Color(0xff0000ff);
-	private Color darkRed = new Color(0xaa0000ff);
-	private Color green = new Color(0x00ff00ff);
-	private Color darkGreen = new Color(0x00aa00ff);
-	private Color blue = new Color(0x0000ffff);
-	private Color darkBlue = new Color(0x0000aaff);
+	private final Color yellow = new Color(0xffff00ff);
+	private final Color darkYellow = new Color(0xaaaa00ff);
+	private final Color red = new Color(0xff0000ff);
+	private final Color darkRed = new Color(0xaa0000ff);
+	private final Color green = new Color(0x00ff00ff);
+	private final Color darkGreen = new Color(0x00aa00ff);
+	private final Color blue = new Color(0x0000ffff);
+	private final Color darkBlue = new Color(0x0000aaff);
 
 
 

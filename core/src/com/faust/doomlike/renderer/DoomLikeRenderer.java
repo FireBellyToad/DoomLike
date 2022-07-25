@@ -28,7 +28,6 @@ public class DoomLikeRenderer {
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
-    private static final Color yellow = new Color(0xffff00ff);
     private final OrthographicCamera camera;
     private final Texture shapeRendererTexture;
 
@@ -86,14 +85,14 @@ public class DoomLikeRenderer {
         for (WallData wall : sector.getWalls()) {
 
             // Place the wall in world relative to player position
-            int x1 = (int) (wall.getBottomLeftPoint().x - playerInstance.getPosition().x);
-            int y1 = (int) (wall.getBottomLeftPoint().y - playerInstance.getPosition().y);
-            int x2 = (int) (wall.getBottomRightPoint().x - playerInstance.getPosition().x);
-            int y2 = (int) (wall.getBottomRightPoint().y - playerInstance.getPosition().y);
+            float x1 =  (wall.getBottomLeftPoint().x - playerInstance.getPosition().x);
+            float y1 =  (wall.getBottomLeftPoint().y - playerInstance.getPosition().y);
+            float x2 =  (wall.getBottomRightPoint().x - playerInstance.getPosition().x);
+            float y2 = (wall.getBottomRightPoint().y - playerInstance.getPosition().y);
 
             //Swap for drawing backface
             if (backfaceCulling) {
-                int tempSwap = x1;
+                float tempSwap = x1;
                 x1 = x2;
                 x2 = tempSwap;
                 tempSwap = y1;
