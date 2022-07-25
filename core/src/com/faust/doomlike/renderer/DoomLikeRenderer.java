@@ -1,15 +1,17 @@
 package com.faust.doomlike.renderer;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.faust.doomlike.DoomLikeTestGame;
 import com.faust.doomlike.renderer.data.WallData;
 import com.faust.doomlike.test.PlayerInstance;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /**
  * Renderer class
@@ -22,13 +24,22 @@ public class DoomLikeRenderer {
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32;
 
     private final SpriteBatch batch;
-    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
+    private final ShapeDrawer shapeDrawer;
     private static final Color yellow = new Color(0xffff00ff);
     private final OrthographicCamera camera;
+    private final Texture shapeRendererTexture;
 
     public DoomLikeRenderer(SpriteBatch batch, OrthographicCamera camera) {
         this.batch = batch;
         this.camera = camera;
+
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.drawPixel(0, 0);
+        shapeRendererTexture = new Texture(pixmap); //remember to dispose of later
+        pixmap.dispose();
+
+        this.shapeDrawer = new ShapeDrawer(batch,new TextureRegion(shapeRendererTexture, 0, 0, 1, 1));
     }
 
     public void draw3d(PlayerInstance playerInstance) {
@@ -120,6 +131,7 @@ public class DoomLikeRenderer {
         bottomLeftPoint.x = MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH-1);
         bottomRightPoint.x = MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH-1);
 
+        batch.begin();
         //Draw x vertical lines
         for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
             // Get the Y start and end point (0.5 is used for rounding)
@@ -128,22 +140,24 @@ public class DoomLikeRenderer {
 
             //Clip Y
             yBottomPoint = MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT-1);
-            yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT-1);
+            yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT-2);
 
 //            // Draw pixel by pixel (HEAVY)
-//            drawPixel(xToRender, yBottomPoint, yellow);
-//            drawPixel(xToRender, yTopPoint, yellow);
-//
-//            // draw vertical line to fill the wall
-//            for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
-//                drawPixel(xToRender, yToRender, yellow);
-//
-//            }
+            drawPixel(xToRender, yBottomPoint, yellow);
+            drawPixel(xToRender, yTopPoint, yellow);
 
             // draw vertical line to fill the wall
-            drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, yellow);
+            for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
+                drawPixel(xToRender, yToRender, yellow);
+
+            }
+
+            // draw vertical line to fill the wall
+//            drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, yellow);
 
         }
+
+        batch.end();
     }
 
     /**
@@ -172,11 +186,8 @@ public class DoomLikeRenderer {
      */
     private void drawLine(float x1, float y1,float x2, float y2, Color pixelColor) {
         batch.begin();
-        shapeRenderer.setColor(pixelColor);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.rectLine(x1,y1,x2,y2,1);
-        shapeRenderer.end();
+        shapeDrawer.setColor(pixelColor);
+        shapeDrawer.line(x1,y1,x2,y2,1);
         batch.end();
 
     }
@@ -189,18 +200,13 @@ public class DoomLikeRenderer {
      * @param pixelColor
      */
     private void drawPixel(float x, float y, Color pixelColor) {
-        batch.begin();
-        shapeRenderer.setColor(pixelColor);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.rect(x, y, 1, 1);
-        shapeRenderer.end();
-        batch.end();
+        shapeDrawer.setColor(pixelColor);
+        shapeDrawer.rectangle(x, y, 1, 1);
 
     }
 
     public void dispose() {
-        shapeRenderer.dispose();
+        shapeRendererTexture.dispose();
     }
 
 }
