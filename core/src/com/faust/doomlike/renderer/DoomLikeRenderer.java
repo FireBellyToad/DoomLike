@@ -1,7 +1,7 @@
 package com.faust.doomlike.renderer;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,15 +23,15 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
  */
 public class DoomLikeRenderer {
 
-    private static final int FIELD_OF_VIEW = 200;
-    private static final int VERTICAL_LOOK_SCALE_FACTOR = 32;
+    private static final float FIELD_OF_VIEW = 200f;
+    private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
-    private final OrthographicCamera camera;
+    private final Camera camera;
     private final Texture shapeRendererTexture;
 
-    public DoomLikeRenderer(SpriteBatch batch, OrthographicCamera camera) {
+    public DoomLikeRenderer(SpriteBatch batch, Camera camera) {
         this.batch = batch;
         this.camera = camera;
 
@@ -45,12 +45,13 @@ public class DoomLikeRenderer {
     }
 
     public void draw3d(MapWrapper map, PlayerInstance playerInstance) {
-
+        this.camera.update();
         this.batch.setProjectionMatrix(camera.combined);
 
         //For eachSectors, render all walls
         map.getSectors().sort((s1, s2) -> Float.compare(s2.getDepth(), s1.getDepth()));
 
+        batch.begin();
         for (SectorWrapper sector : map.getSectors()) {
             //Clear distance
             sector.setDepth(0);
@@ -69,6 +70,9 @@ public class DoomLikeRenderer {
             //Find average sector distance
             sector.setDepth(sector.getDepth() / sector.getWalls().size());
         }
+        this.shapeDrawer.update();
+
+        batch.end();
     }
 
     private void drawAllSectorWalls(SectorWrapper sector, PlayerInstance playerInstance, boolean backfaceCulling) {
@@ -77,18 +81,18 @@ public class DoomLikeRenderer {
         final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
 
         // helper variables
-        final Vector3 bottomLeftPoint = new Vector3();
-        final Vector3 bottomRightPoint = new Vector3();
-        final Vector3 topLeftPoint = new Vector3();
-        final Vector3 topRightPoint = new Vector3();
+        final Vector3 bottomLeftPoint = new Vector3(); // wx[0]  wy[0]  wz[0]
+        final Vector3 bottomRightPoint = new Vector3(); // wx[1]  wy[1]  wz[1]
+        final Vector3 topLeftPoint = new Vector3(); // wx[2]  wy[2]  wz[2]
+        final Vector3 topRightPoint = new Vector3(); // wx[3]  wy[3]  wz[3]
 
         for (WallData wall : sector.getWalls()) {
 
             // Place the wall in world relative to player position
-            float x1 =  (wall.getBottomLeftPoint().x - playerInstance.getPosition().x);
-            float y1 =  (wall.getBottomLeftPoint().y - playerInstance.getPosition().y);
-            float x2 =  (wall.getBottomRightPoint().x - playerInstance.getPosition().x);
-            float y2 = (wall.getBottomRightPoint().y - playerInstance.getPosition().y);
+            float x1 = (wall.getBottomLeftPoint().x - MathUtils.round(playerInstance.getPosition().x));
+            float y1 = (wall.getBottomLeftPoint().y - MathUtils.round(playerInstance.getPosition().y));
+            float x2 = (wall.getBottomRightPoint().x - MathUtils.round(playerInstance.getPosition().x));
+            float y2 = (wall.getBottomRightPoint().y - MathUtils.round(playerInstance.getPosition().y));
 
             //Swap for drawing backface
             if (backfaceCulling) {
@@ -123,7 +127,7 @@ public class DoomLikeRenderer {
             sector.setDepth(Vector2.Zero.dst((bottomLeftPoint.x + bottomRightPoint.x) / 2, (bottomLeftPoint.y + bottomRightPoint.y) / 2));
 
             // If wall is behind player
-            if (bottomLeftPoint.y < 0 && bottomRightPoint.y < 1)
+            if (bottomLeftPoint.y < 0 && bottomRightPoint.y < 0)
                 //don't draw
                 continue;
             else if (bottomLeftPoint.y < 0) {
@@ -136,41 +140,40 @@ public class DoomLikeRenderer {
             }
 
             // Calculate X and Y screen position, scaling from screen origin
-            bottomLeftPoint.x = bottomLeftPoint.x * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
-            bottomLeftPoint.y = bottomLeftPoint.z * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+            bottomLeftPoint.x = MathUtils.round(bottomLeftPoint.x * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
+            bottomLeftPoint.y = MathUtils.round(bottomLeftPoint.z * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
 
-            bottomRightPoint.x = bottomRightPoint.x * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
-            bottomRightPoint.y = bottomRightPoint.z * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+            bottomRightPoint.x = MathUtils.round(bottomRightPoint.x * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
+            bottomRightPoint.y =MathUtils.round( bottomRightPoint.z * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
 
-            topLeftPoint.x = topLeftPoint.x * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
-            topLeftPoint.y = topLeftPoint.z * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+            topLeftPoint.x =MathUtils.round( topLeftPoint.x * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
+            topLeftPoint.y = MathUtils.round(topLeftPoint.z * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
 
-            topRightPoint.x = topRightPoint.x * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2;
-            topRightPoint.y = topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2;
+            topRightPoint.x = MathUtils.round(topRightPoint.x * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
+            topRightPoint.y = MathUtils.round(topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
 
+            //drawWall(wx[0],wx[1],wy[0],wy[1],wy[2],wy[3])
             //Draw points if on screen
-            float bottomPointYDistance = (bottomRightPoint.y - bottomLeftPoint.y);
-            float xDistance = Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x));
-            float topPointYDistance = (topRightPoint.y - topLeftPoint.y);
-            float xStartingPosition =  bottomLeftPoint.x;
+            float bottomPointYDistance = MathUtils.round((bottomRightPoint.y - bottomLeftPoint.y));
+            float topPointYDistance = MathUtils.round((topRightPoint.y - topLeftPoint.y));
+            float xDistance = MathUtils.round(Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x)));
+            float xStartingPosition = MathUtils.round(bottomLeftPoint.x);
 
             //Clip x
-            bottomLeftPoint.x = MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH);
-            bottomRightPoint.x = MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH);
+            bottomLeftPoint.x = MathUtils.round(MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH));
+            bottomRightPoint.x = MathUtils.round(MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH));
 
-            batch.begin();
             //Draw x vertical lines
             for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
                 // Get the Y start and end point (0.5 is used for rounding)
-                float yBottomPoint =  (bottomPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + bottomLeftPoint.y);
-                float yTopPoint =  (topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y);
+                float yBottomPoint = MathUtils.round((bottomPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + bottomLeftPoint.y));
+                float yTopPoint = MathUtils.round((topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y));
 
                 //Clip Y
-                yBottomPoint = MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT);
-                yTopPoint = MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT);
+                yBottomPoint = MathUtils.round(MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT));
+                yTopPoint = MathUtils.round(MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT));
 
-
-                int approx = MathUtils.floor(xToRender);
+                int approx = MathUtils.round(xToRender);
                 //Store surface information
                 if (backfaceCulling) {
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
@@ -196,11 +199,9 @@ public class DoomLikeRenderer {
 //                }
 
                 // draw vertical line to fill the wall
-                drawLine(xToRender,  yBottomPoint, xToRender,  yTopPoint, wall.getColor());
+                drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, wall.getColor());
 
             }
-
-            batch.end();
 
         }
 
@@ -230,7 +231,7 @@ public class DoomLikeRenderer {
      */
     private void drawLine(float x1, float y1, float x2, float y2, Color pixelColor) {
         shapeDrawer.setColor(pixelColor);
-        shapeDrawer.line(x1, y1, x2, y2, 1);
+        shapeDrawer.line(MathUtils.round(x1), MathUtils.round(y1), MathUtils.round(x2), MathUtils.round(y2), 1f);
 
     }
 
