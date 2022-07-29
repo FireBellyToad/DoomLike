@@ -68,7 +68,7 @@ public class DoomLikeRenderer {
             drawAllSectorWalls(sector, playerInstance, true);
             drawAllSectorWalls(sector, playerInstance, false);
             //Find average sector distance
-            sector.setDepth(sector.getDepth() / sector.getWalls().size());
+            sector.setDepth(Math.round(sector.getDepth() / sector.getWalls().size()));
         }
         this.shapeDrawer.update();
 
@@ -105,26 +105,27 @@ public class DoomLikeRenderer {
             }
 
             // Calculate X, Y (depth) and Z (height) world position for both points, from origin
-            bottomLeftPoint.x = x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin;
+            bottomLeftPoint.x = Math.round(x1 * playerAngleCurrentCos - y1 * playerAngleCurrentSin);
             topLeftPoint.x = bottomLeftPoint.x;
             //Must be not 0
-            bottomLeftPoint.y = Math.max(1, y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin);
+            bottomLeftPoint.y = Math.round(Math.max(1, y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin));
             topLeftPoint.y = bottomLeftPoint.y;
             // Use vertical looking angle to offset Z
-            bottomLeftPoint.z = sector.getBottomHeight() - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomLeftPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
+            bottomLeftPoint.z = Math.round(sector.getBottomHeight() - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomLeftPoint.y) / VERTICAL_LOOK_SCALE_FACTOR));
             topLeftPoint.z = sector.getTopHeight() + bottomLeftPoint.z;
 
-            bottomRightPoint.x = x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin;
+            bottomRightPoint.x = Math.round(x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin);
             topRightPoint.x = bottomRightPoint.x;
             //Must be not 0
-            bottomRightPoint.y = Math.max(1, y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin);
+            bottomRightPoint.y = Math.round(Math.max(1, y2 * playerAngleCurrentCos + x2 * playerAngleCurrentSin));
             topRightPoint.y = bottomRightPoint.y;
-            // Use vertical looking angle to offset Z
-            bottomRightPoint.z = sector.getBottomHeight() - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomRightPoint.y) / VERTICAL_LOOK_SCALE_FACTOR);
-            topRightPoint.z = sector.getTopHeight() + bottomRightPoint.z;
 
-            // Store this wall distance
-            sector.setDepth(Vector2.Zero.dst((bottomLeftPoint.x + bottomRightPoint.x) / 2, (bottomLeftPoint.y + bottomRightPoint.y) / 2));
+            // add this wall distance to sector depth
+            sector.addToDepth(Math.round(Vector2.Zero.dst((bottomLeftPoint.x + bottomRightPoint.x) / 2, (bottomLeftPoint.y + bottomRightPoint.y) / 2)));
+
+            // Use vertical looking angle to offset Z
+            bottomRightPoint.z = Math.round(sector.getBottomHeight() - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomRightPoint.y) / VERTICAL_LOOK_SCALE_FACTOR));
+            topRightPoint.z = sector.getTopHeight() + bottomRightPoint.z;
 
             // If wall is behind player
             if (bottomLeftPoint.y < 0 && bottomRightPoint.y < 0)
@@ -156,7 +157,10 @@ public class DoomLikeRenderer {
             //Draw points if on screen
             float bottomPointYDistance = MathUtils.round((bottomRightPoint.y - bottomLeftPoint.y));
             float topPointYDistance = MathUtils.round((topRightPoint.y - topLeftPoint.y));
-            float xDistance = MathUtils.round(Math.max(1, (bottomRightPoint.x - bottomLeftPoint.x)));
+            float xDistance = MathUtils.round(bottomRightPoint.x - bottomLeftPoint.x);
+            if(xDistance == 0){
+                xDistance =1;
+            }
             float xStartingPosition = MathUtils.round(bottomLeftPoint.x);
 
             //Clip x

@@ -22,7 +22,7 @@ public class SectorWrapper {
     private final SectorData sectorData;
     private final Map<Integer,Float> surfaceYforXMap =new HashMap<>();
     private SurfaceShownEnum surfaceToShow = SurfaceShownEnum.NONE;
-    private float depth;
+    private float depth = 0;
 
     public SectorWrapper(SectorData sectorData) {
         this.sectorData = sectorData;
@@ -46,6 +46,10 @@ public class SectorWrapper {
 
     public void setDepth(float depth) {
         this.depth = depth;
+    }
+
+    public void addToDepth(float depth) {
+        this.depth += depth;
     }
 
     public List<WallData> getWalls(){
