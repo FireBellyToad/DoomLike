@@ -20,6 +20,8 @@ public class SectorWrapper {
     }
 
     private final SectorData sectorData;
+    //Map for surface Y limit for each X
+    //Using float as key,remember to round the value appropriately!
     private final Map<Float,Float> surfaceYforXMap =new HashMap<>();
     private SurfaceShownEnum surfaceToShow = SurfaceShownEnum.NONE;
     private float depth = 0;
@@ -56,12 +58,12 @@ public class SectorWrapper {
         return sectorData.getWalls();
     }
 
-    public float getBottomHeight() {
-        return sectorData.getBottomHeight();
+    public float getBottomZ() {
+        return sectorData.getBottomZ();
     }
 
-    public float getTopHeight() {
-        return sectorData.getTopHeight();
+    public float getTopZ() {
+        return sectorData.getTopZ();
     }
 
     public Color getTopColor() {
