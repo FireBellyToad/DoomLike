@@ -47,7 +47,7 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         renderer = new DoomLikeRenderer(batch, camera);
 
         //FIXME mock map
-        MapData testMapData = TestMapFactory.getHollowMap();
+        MapData testMapData = TestMapFactory.getFourCubes();
 
 		testMapData.getSectors().forEach(s -> {
             Gdx.app.log("DEBUG", s.getSectorUuid());

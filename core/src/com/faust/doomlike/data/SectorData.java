@@ -16,8 +16,8 @@ public class SectorData {
 
     final private String sectorUuid;
     final private Vector2 origin = new Vector2();
-    private float bottomHeight;
-    private float topHeight;
+    private float bottomZ;
+    private float topZ;
     private Color bottomColor;
     private Color topColor;
 
@@ -32,20 +32,20 @@ public class SectorData {
         return origin;
     }
 
-    public float getBottomHeight() {
-        return bottomHeight;
+    public float getBottomZ() {
+        return bottomZ;
     }
 
-    public void setBottomHeight(float bottomHeight) {
-        this.bottomHeight = bottomHeight;
+    public void setBottomZ(float bottomZ) {
+        this.bottomZ = bottomZ;
     }
 
-    public float getTopHeight() {
-        return topHeight;
+    public float getTopZ() {
+        return topZ;
     }
 
-    public void setTopHeight(float topHeight) {
-        this.topHeight = topHeight;
+    public void setTopZ(float topZ) {
+        this.topZ = topZ;
     }
 
     public List<WallData> getWalls() {
