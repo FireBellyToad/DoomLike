@@ -20,8 +20,8 @@ public class TestMapFactory {
     public static MapData getFourCubes() {
         MapData testMapData = new MapData();
         testMapData.getSectors().add(new SectorData() {{
-            setTopHeight(0);
-            setTopHeight(40);
+            setTopZ(0);
+            setTopZ(40);
             setBottomColor(red);
             setTopColor(darkRed);
             this.getWalls().add(new WallData(0, 0, 32, 0, yellow));
@@ -30,8 +30,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(0, 32, 0, 0, darkYellow));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setTopHeight(0);
-            setTopHeight(40);
+            setTopZ(0);
+            setTopZ(40);
             setBottomColor(blue);
             setTopColor(darkBlue);
             this.getWalls().add(new WallData(64, 0, 96, 0, red));
@@ -40,8 +40,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(64, 32, 64, 0, darkRed));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setTopHeight(0);
-            setTopHeight(40);
+            setTopZ(0);
+            setTopZ(40);
             setBottomColor(yellow);
             setTopColor(darkYellow);
             this.getWalls().add(new WallData(64, 64, 96, 64, green));
@@ -50,8 +50,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(64, 96, 64, 64, darkGreen));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setTopHeight(0);
-            setTopHeight(40);
+            setTopZ(0);
+            setTopZ(40);
             setBottomColor(green);
             setTopColor(darkGreen);
             this.getWalls().add(new WallData(0, 64, 32, 64, blue));
@@ -65,8 +65,8 @@ public class TestMapFactory {
     public static MapData getHollowMap() {
         MapData testMapData = new MapData();
         testMapData.getSectors().add(new SectorData() {{
-            setBottomHeight(0);
-            setTopHeight(6);
+            setBottomZ(0);
+            setTopZ(6);
             setBottomColor(yellow);
             setTopColor(darkYellow);
             this.getWalls().add(new WallData(112, 120, 136, 144, yellow));
@@ -75,8 +75,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(112, 208, 112, 120, darkYellow));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setBottomHeight(-12);
-            setTopHeight(6);
+            setBottomZ(-12);
+            setTopZ(6);
             setBottomColor(darkBlue);
             setTopColor(yellow);
             this.getWalls().add(new WallData(152, 168, 152, 160, red));
@@ -89,8 +89,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(160, 176, 152, 168, darkRed));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setBottomHeight(0);
-            setTopHeight(6);
+            setBottomZ(0);
+            setTopZ(6);
             setBottomColor(yellow);
             setTopColor(darkYellow);
             this.getWalls().add(new WallData(192, 144, 216, 120, green));
@@ -99,8 +99,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(192, 184, 192, 144, darkGreen));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setBottomHeight(0);
-            setTopHeight(6);
+            setBottomZ(0);
+            setTopZ(6);
             setBottomColor(yellow);
             setTopColor(darkYellow);
             this.getWalls().add(new WallData(136, 184, 192, 184, darkBlue));
@@ -109,8 +109,8 @@ public class TestMapFactory {
             this.getWalls().add(new WallData(112, 208, 136, 184, darkBlue));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setBottomHeight(32);
-            setTopHeight(50);
+            setBottomZ(32);
+            setTopZ(50);
             setBottomColor(yellow);
             setTopColor(darkYellow);
             this.getWalls().add(new WallData(160, 152, 168, 152, darkBlue));
