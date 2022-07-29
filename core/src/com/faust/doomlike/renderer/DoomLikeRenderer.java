@@ -177,23 +177,22 @@ public class DoomLikeRenderer {
                 yBottomPoint = MathUtils.round(MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT));
                 yTopPoint = MathUtils.round(MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT));
 
-                int approx = MathUtils.round(xToRender);
                 //Store surface information
                 if (backfaceCulling) {
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-                        sector.getSurfaceYforXMap().put(approx, yBottomPoint);
+                        sector.getSurfaceYforXMap().put(xToRender, yBottomPoint);
                         continue;
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-                        sector.getSurfaceYforXMap().put(approx, yTopPoint);
+                        sector.getSurfaceYforXMap().put(xToRender, yTopPoint);
                         continue;
                     }
-                } else if (sector.getSurfaceYforXMap().containsKey(approx)) {
+                } else if (sector.getSurfaceYforXMap().containsKey(xToRender)) {
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-                        drawLine(xToRender, sector.getSurfaceYforXMap().get(approx), xToRender, yTopPoint, sector.getBottomColor());
+                        drawLine(xToRender, sector.getSurfaceYforXMap().get(xToRender), xToRender, yTopPoint, sector.getBottomColor());
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-                        drawLine(xToRender, yBottomPoint, xToRender, sector.getSurfaceYforXMap().get(approx), sector.getTopColor());
+                        drawLine(xToRender, yBottomPoint, xToRender, sector.getSurfaceYforXMap().get(xToRender), sector.getTopColor());
                     }
                 }
 
