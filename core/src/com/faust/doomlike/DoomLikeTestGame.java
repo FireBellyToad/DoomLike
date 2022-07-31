@@ -2,15 +2,13 @@ package com.faust.doomlike;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.faust.doomlike.data.MapData;
-import com.faust.doomlike.data.SectorData;
-import com.faust.doomlike.data.WallData;
-import com.faust.doomlike.renderer.DoomLikeRenderer;
+import com.faust.doomlike.renderer.WorldRenderer;
+import com.faust.doomlike.renderer.impl.DoomLikeRenderer;
 import com.faust.doomlike.test.PlayerInstance;
 import com.faust.doomlike.test.TestMapFactory;
 import com.faust.doomlike.utils.MapWrapper;
@@ -30,7 +28,7 @@ public class DoomLikeTestGame extends ApplicationAdapter {
     private Texture img;
 
     private PlayerInstance playerInstance;
-    private DoomLikeRenderer renderer;
+    private WorldRenderer renderer;
     private MapWrapper testMap;
 
     @Override
@@ -47,7 +45,7 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         renderer = new DoomLikeRenderer(batch, camera);
 
         //FIXME mock map
-        MapData testMapData = TestMapFactory.getFourCubes();
+        MapData testMapData = TestMapFactory.getHollowMap();
 
 		testMapData.getSectors().forEach(s -> {
             Gdx.app.log("DEBUG", s.getSectorUuid());
@@ -63,7 +61,7 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         playerInstance.doLogic();
-        renderer.draw3d(testMap, playerInstance);
+        renderer.drawWorld(testMap, playerInstance);
     }
 
     @Override
