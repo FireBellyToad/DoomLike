@@ -1,4 +1,4 @@
-package com.faust.doomlike.renderer;
+package com.faust.doomlike.renderer.impl;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.faust.doomlike.DoomLikeTestGame;
 import com.faust.doomlike.data.WallData;
+import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.test.PlayerInstance;
 import com.faust.doomlike.utils.MapWrapper;
 import com.faust.doomlike.utils.SectorWrapper;
@@ -21,7 +22,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
  *
  * @author Jacopo "Faust" Buttiglieri
  */
-public class DoomLikeRenderer {
+public class DoomLikeRenderer implements WorldRenderer {
 
     private static final float FIELD_OF_VIEW = 200f;
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
@@ -44,7 +45,7 @@ public class DoomLikeRenderer {
         this.shapeDrawer = new ShapeDrawer(batch, new TextureRegion(shapeRendererTexture, 0, 0, 1, 1));
     }
 
-    public void draw3d(MapWrapper map, PlayerInstance playerInstance) {
+    public void drawWorld(MapWrapper map, PlayerInstance playerInstance) {
         this.camera.update();
         this.batch.setProjectionMatrix(camera.combined);
 
