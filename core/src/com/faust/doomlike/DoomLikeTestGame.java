@@ -3,9 +3,6 @@ package com.faust.doomlike;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.faust.doomlike.data.MapData;
 import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.renderer.impl.DoomLikeRenderer;
@@ -24,25 +21,17 @@ public class DoomLikeTestGame extends ApplicationAdapter {
     public static final int GAME_HEIGHT = 120;
     public static final int SCALE_FACTOR = 4;
 
-    private SpriteBatch batch;
-    private Texture img;
-
     private PlayerInstance playerInstance;
     private WorldRenderer renderer;
     private MapWrapper testMap;
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
-        img = new Texture("badlogic.jpg");
 
         playerInstance = new PlayerInstance();
         Gdx.input.setInputProcessor(playerInstance);
 
-        OrthographicCamera camera = new OrthographicCamera();
-        camera.setToOrtho(false, GAME_WIDTH, GAME_HEIGHT);
-
-        renderer = new DoomLikeRenderer(batch, camera);
+        renderer = new DoomLikeRenderer();
 
         //FIXME mock map
         MapData testMapData = TestMapFactory.getHollowMap();
@@ -52,6 +41,7 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         });
 
         testMap = new MapWrapper(testMapData);
+//        renderer = new True3DRenderer(testMap.getSectors());
 
     }
 
@@ -67,7 +57,5 @@ public class DoomLikeTestGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         renderer.dispose();
-        batch.dispose();
-        img.dispose();
     }
 }
