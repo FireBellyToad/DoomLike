@@ -29,19 +29,19 @@ public class True3DRenderer implements WorldRenderer {
     public List<Model> modelList = new ArrayList<>();
     public List<ModelInstance> instanceList = new ArrayList<>();
 
-    public True3DRenderer(MapWrapper mapWrapper, PlayerInstance playerInstance) {
+    public True3DRenderer(MapWrapper mapWrapper) {
 
         // Add environment Light
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
-        WallData firstWall = sectors.get(0).getWalls().get(0);
+        WallData firstWall = mapWrapper.getSectors().get(0).getWalls().get(0);
         modelBatch = new ModelBatch();
 
         //Camera is player
         camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.position.set(playerInstance.getPosition());
+        camera.position.set(Vector3.Zero);
         camera.lookAt(firstWall.getBottomRightPoint().x,firstWall.getBottomRightPoint().y,0);
         camera.near = 1f;
         camera.far = 300f;
