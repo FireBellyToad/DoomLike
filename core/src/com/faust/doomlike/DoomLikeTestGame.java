@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.faust.doomlike.data.MapData;
 import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.renderer.impl.DoomLikeRenderer;
+import com.faust.doomlike.renderer.impl.True3DRenderer;
 import com.faust.doomlike.test.PlayerInstance;
 import com.faust.doomlike.test.TestMapFactory;
 import com.faust.doomlike.utils.MapWrapper;
@@ -31,7 +32,6 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         playerInstance = new PlayerInstance();
         Gdx.input.setInputProcessor(playerInstance);
 
-        renderer = new DoomLikeRenderer();
 
         //FIXME mock map
         MapData testMapData = TestMapFactory.getHollowMap();
@@ -41,7 +41,8 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         });
 
         testMap = new MapWrapper(testMapData);
-//        renderer = new True3DRenderer(testMap.getSectors());
+//        renderer = new DoomLikeRenderer();
+        renderer = new True3DRenderer(testMap.getSectors(),playerInstance);
 
     }
 
