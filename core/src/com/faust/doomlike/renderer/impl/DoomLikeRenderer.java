@@ -1,9 +1,6 @@
 package com.faust.doomlike.renderer.impl;
 
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -29,12 +26,13 @@ public class DoomLikeRenderer implements WorldRenderer {
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
-    private final Camera camera;
+    private final OrthographicCamera camera;
     private final Texture shapeRendererTexture;
 
-    public DoomLikeRenderer(SpriteBatch batch, Camera camera) {
-        this.batch = batch;
-        this.camera = camera;
+    public DoomLikeRenderer() {
+        this.batch = new SpriteBatch();
+        this.camera = new OrthographicCamera();
+        this.camera.setToOrtho(false, DoomLikeTestGame.GAME_WIDTH, DoomLikeTestGame.GAME_HEIGHT);
 
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
@@ -260,6 +258,7 @@ public class DoomLikeRenderer implements WorldRenderer {
     }
 
     public void dispose() {
+        batch.dispose();
         shapeRendererTexture.dispose();
     }
 
