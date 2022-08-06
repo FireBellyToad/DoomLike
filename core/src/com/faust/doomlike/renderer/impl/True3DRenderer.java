@@ -10,15 +10,18 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.EarClippingTriangulator;
+import com.badlogic.gdx.math.GeometryUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.ShortArray;
 import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.test.PlayerInstance;
 import com.faust.doomlike.utils.MapWrapper;
 import com.faust.doomlike.utils.SectorWrapper;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class True3DRenderer implements WorldRenderer {
 
@@ -26,6 +29,8 @@ public class True3DRenderer implements WorldRenderer {
     private PerspectiveCamera camera;
     private ModelBuilder modelBuilder = new ModelBuilder();
     public Environment environment;
+    public EarClippingTriangulator triangulator = new EarClippingTriangulator();
+
     public List<Model> modelList = new ArrayList<>();
     public List<ModelInstance> instanceList = new ArrayList<>();
 
@@ -42,7 +47,7 @@ public class True3DRenderer implements WorldRenderer {
         //Camera is player
         camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(Vector3.Zero);
-        camera.lookAt(firstWall.getBottomRightPoint().x,firstWall.getBottomRightPoint().y,0);
+        camera.lookAt(firstWall.getBottomRightPoint().x, firstWall.getBottomRightPoint().y, 0);
         camera.near = 1f;
         camera.far = 300f;
         camera.update();
@@ -52,14 +57,16 @@ public class True3DRenderer implements WorldRenderer {
     }
 
     /**
-     * Create a model from a
+     * Create a model from a sector list
+     *
      * @param sectorList
      */
     private void createModel(List<SectorWrapper> sectorList) {
         this.modelBuilder.begin();
 
-        final List<Vector3> bottomSurfaceVertexes = new ArrayList<>();
-        final List<Vector3> topSurfaceVertexes = new ArrayList<>();
+        //LinkedHashSet because insertion order and uniqueness of x,y pairs must be preserved!
+        final Set<Vector2> bottomSurfaceVertexes = new LinkedHashSet<>();
+        final Set<Vector2> topSurfaceVertexes = new LinkedHashSet<>();
 
         MeshPartBuilder meshPartBuilder = null;
         VertexInfo bottomLeftCorner;
@@ -77,7 +84,7 @@ public class True3DRenderer implements WorldRenderer {
 
             for (WallData wallData : sector.getWalls()) {
 
-                //Create Walls
+                //Create Wall mesh
                 material = new Material(ColorAttribute.createDiffuse(wallData.getColor()));
 
                 meshPartBuilder = modelBuilder.part(wallData.getWallUuid(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
@@ -89,40 +96,14 @@ public class True3DRenderer implements WorldRenderer {
                 meshPartBuilder.rect(bottomLeftCorner, bottomRightCorner, topRightCorner, topLeftCorner);
 
                 //Save vertexes for surface rendering
-                bottomSurfaceVertexes.add(bottomLeftCorner.position);
-                bottomSurfaceVertexes.add(bottomRightCorner.position);
-                topSurfaceVertexes.add(topLeftCorner.position);
-                topSurfaceVertexes.add(topRightCorner.position);
+                bottomSurfaceVertexes.add(new Vector2(bottomLeftCorner.position.x,bottomLeftCorner.position.y));
+                bottomSurfaceVertexes.add(new Vector2(bottomRightCorner.position.x,bottomRightCorner.position.y));
+                topSurfaceVertexes.add(new Vector2(topLeftCorner.position.x,topLeftCorner.position.y));
+                topSurfaceVertexes.add(new Vector2(topRightCorner.position.x,topRightCorner.position.y));
             }
 
-            //Generate bottom surface mesh
-            for (int surf = 1; surf < bottomSurfaceVertexes.size() - 1; surf++) {
-
-                material = new Material(ColorAttribute.createDiffuse(sector.getBottomColor()));
-                meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + "-B", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
-
-                //TODO This triagulation must be improved!
-                bottomLeftCorner = new VertexInfo().setPos(bottomSurfaceVertexes.get(0).x, bottomSurfaceVertexes.get(0).y, bottomSurfaceVertexes.get(0).z).setNor(0, 0, 1);
-                bottomRightCorner = new VertexInfo().setPos(bottomSurfaceVertexes.get(surf).x, bottomSurfaceVertexes.get(surf).y, bottomSurfaceVertexes.get(surf).z).setNor(0, 0, 1);
-                topRightCorner = new VertexInfo().setPos(bottomSurfaceVertexes.get(surf + 1).x, bottomSurfaceVertexes.get(surf + 1).y, bottomSurfaceVertexes.get(surf + 1).z).setNor(0, 0, 1);
-
-                meshPartBuilder.triangle(topRightCorner, bottomRightCorner, bottomLeftCorner);
-            }
-
-            //Generate top surface mesh
-            for (int surf = 1; surf < topSurfaceVertexes.size() - 1; surf++) {
-
-                material = new Material(ColorAttribute.createDiffuse(sector.getBottomColor()));
-                meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + "-B", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
-
-                //TODO This triagulation must be improved!
-                bottomLeftCorner = new VertexInfo().setPos(topSurfaceVertexes.get(0).x, topSurfaceVertexes.get(0).y, topSurfaceVertexes.get(0).z).setNor(0, 0, 1);
-                bottomRightCorner = new VertexInfo().setPos(topSurfaceVertexes.get(surf).x, topSurfaceVertexes.get(surf).y, topSurfaceVertexes.get(surf).z).setNor(0, 0, 1);
-                topRightCorner = new VertexInfo().setPos(topSurfaceVertexes.get(surf + 1).x, topSurfaceVertexes.get(surf + 1).y, topSurfaceVertexes.get(surf + 1).z).setNor(0, 0, 1);
-
-                meshPartBuilder.triangle(bottomLeftCorner, bottomRightCorner, topRightCorner);
-            }
-
+            createSurfaceMesh(meshPartBuilder, sector,  bottomSurfaceVertexes, sector.getBottomZ(), "-B");
+            createSurfaceMesh(meshPartBuilder, sector, topSurfaceVertexes, sector.getTopZ(), "-T");
 
         }
 
@@ -130,6 +111,51 @@ public class True3DRenderer implements WorldRenderer {
         Model resultModel = modelBuilder.end();
         modelList.add(resultModel);
         instanceList.add(new ModelInstance(resultModel));
+    }
+
+    /**
+     * Create a surface mesh using EarClipping triangulation
+     *
+     * @param meshPartBuilder
+     * @param sector
+     * @param surfaceVertexes
+     * @param z coordinate
+     * @param idSuffix appended to sector uuid , which will be used as mesh id
+     */
+    private void createSurfaceMesh(MeshPartBuilder meshPartBuilder, final SectorWrapper sector, final Set<Vector2> surfaceVertexes, final float z, final String idSuffix) {
+
+        Material material;
+        VertexInfo point1;
+        VertexInfo point2;
+        VertexInfo point3;
+
+        //Helpers for triangulation
+        final List<Vector2> surfaceVertexPairsList = new ArrayList<>();
+        final float[] flatSurfaceVertexesArray = new float[surfaceVertexes.size() * 2];
+
+        int i = 0;
+        for(Vector2 item : surfaceVertexes){
+            surfaceVertexPairsList.add(item);
+            flatSurfaceVertexesArray[i] = item.x;
+            flatSurfaceVertexesArray[i+1] = item.y;
+            i +=2;
+        }
+        
+        ShortArray triangulationResult = triangulator.computeTriangles(flatSurfaceVertexesArray);
+
+        //Generate surface mesh
+        for (int surf = 0; surf < triangulationResult.size; surf+=3) {
+            material = new Material(ColorAttribute.createDiffuse(sector.getBottomColor()));
+            meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + idSuffix, GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
+
+            point1 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf)).x, surfaceVertexPairsList.get(triangulationResult.get(surf)).y, z).setNor(0, 0, 1);
+            point2 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf+1)).x, surfaceVertexPairsList.get(triangulationResult.get(surf+1)).y, z).setNor(0, 0, 1);
+            point3 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf+2)).x, surfaceVertexPairsList.get(triangulationResult.get(surf+2)).y, z).setNor(0, 0, 1);
+
+            meshPartBuilder.triangle(point3, point2, point1);
+
+        }
+
     }
 
     @Override

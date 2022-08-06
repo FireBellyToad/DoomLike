@@ -42,7 +42,7 @@ public class DoomLikeTestGame extends ApplicationAdapter {
 
         testMap = new MapWrapper(testMapData);
 //        renderer = new DoomLikeRenderer();
-        renderer = new True3DRenderer(testMap,playerInstance);
+        renderer = new True3DRenderer(testMap);
 
     }
 
