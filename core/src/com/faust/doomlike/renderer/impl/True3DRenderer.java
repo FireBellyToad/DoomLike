@@ -102,8 +102,8 @@ public class True3DRenderer implements WorldRenderer {
                 topSurfaceVertexes.add(new Vector2(topRightCorner.position.x,topRightCorner.position.y));
             }
 
-            createSurfaceMesh(meshPartBuilder, sector,  bottomSurfaceVertexes, sector.getBottomZ(), "-B");
-            createSurfaceMesh(meshPartBuilder, sector, topSurfaceVertexes, sector.getTopZ(), "-T");
+            createSurfaceMesh(meshPartBuilder, sector,  bottomSurfaceVertexes, sector.getBottomZ(), true);
+            createSurfaceMesh(meshPartBuilder, sector, topSurfaceVertexes, sector.getTopZ(), false);
 
         }
 
@@ -120,9 +120,11 @@ public class True3DRenderer implements WorldRenderer {
      * @param sector
      * @param surfaceVertexes
      * @param z coordinate
-     * @param idSuffix appended to sector uuid , which will be used as mesh id
+     * @param isBottom should be true if is bottom surface
      */
-    private void createSurfaceMesh(MeshPartBuilder meshPartBuilder, final SectorWrapper sector, final Set<Vector2> surfaceVertexes, final float z, final String idSuffix) {
+    private void createSurfaceMesh(MeshPartBuilder meshPartBuilder, final SectorWrapper sector, final Set<Vector2> surfaceVertexes, final float z, final boolean isBottom) {
+
+        final String idSuffix = isBottom ? "-B" : "-T";
 
         Material material;
         VertexInfo point1;
@@ -152,7 +154,11 @@ public class True3DRenderer implements WorldRenderer {
             point2 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf+1)).x, surfaceVertexPairsList.get(triangulationResult.get(surf+1)).y, z).setNor(0, 0, 1);
             point3 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf+2)).x, surfaceVertexPairsList.get(triangulationResult.get(surf+2)).y, z).setNor(0, 0, 1);
 
-            meshPartBuilder.triangle(point3, point2, point1);
+            if(isBottom){
+                meshPartBuilder.triangle(point1, point2, point3);
+            } else {
+                meshPartBuilder.triangle(point3, point2, point1);
+            }
 
         }
 
