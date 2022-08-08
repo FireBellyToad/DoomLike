@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ShortArray;
+import com.faust.doomlike.DoomLikeTestGame;
 import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.test.PlayerInstance;
@@ -43,13 +44,12 @@ public class True3DRenderer implements WorldRenderer {
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
-        WallData firstWall = mapWrapper.getSectors().get(0).getWalls().get(0);
         modelBatch = new ModelBatch();
 
         //Camera is player
-        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.position.set(Vector3.Zero);
-        camera.lookAt(firstWall.getBottomRightPoint().x, firstWall.getBottomRightPoint().y, 0);
+        camera = new PerspectiveCamera(45, DoomLikeTestGame.GAME_WIDTH, DoomLikeTestGame.GAME_HEIGHT);
+        camera.position.set(70, -110, 20);
+        camera.rotate(Vector3.X,90);
         camera.near = 1f;
         camera.far = 300f;
         camera.update();
@@ -112,7 +112,8 @@ public class True3DRenderer implements WorldRenderer {
         //Add new model to list
         Model resultModel = modelBuilder.end();
         modelList.add(resultModel);
-        instanceList.add(new ModelInstance(resultModel));
+        ModelInstance instance = new ModelInstance(resultModel);
+        instanceList.add(instance);
     }
 
     /**
@@ -150,7 +151,7 @@ public class True3DRenderer implements WorldRenderer {
 
         //Generate surface mesh
         for (int surf = 0; surf < triangulationResult.size; surf += 3) {
-            material = new Material(ColorAttribute.createDiffuse(sector.getBottomColor()));
+            material = new Material(ColorAttribute.createDiffuse(isBottom ? sector.getBottomColor() : sector.getTopColor()));
             meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + idSuffix, GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
 
             point1 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf)).x, surfaceVertexPairsList.get(triangulationResult.get(surf)).y, z).setNor(0, 0, 1);
@@ -169,11 +170,16 @@ public class True3DRenderer implements WorldRenderer {
 
     @Override
     public void drawWorld(MapWrapper map, PlayerInstance playerInstance) {
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        Gdx.gl.glViewport(0, 0, DoomLikeTestGame.GAME_WIDTH, DoomLikeTestGame.GAME_HEIGHT);r
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
+        //Player movement
         camera.position.set(playerInstance.getPosition());
-        camera.lookAt(playerInstance.getPosition());
+        //For looking right and left, must rotate on Z axis
+        camera.rotate(Vector3.Z,-playerInstance.getDeltaAngle());
+        //For looking up down, must rotate on the "perpendicular" vector for the direction normal (ignoring z)
+        Vector3 normal = camera.direction.nor();
+        camera.rotate(-playerInstance.getDeltaLookUpDown(),normal.y,-normal.x,0);
         camera.update();
 
         modelBatch.begin(camera);

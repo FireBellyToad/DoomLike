@@ -46,6 +46,15 @@ public class PlayerInstance implements InputProcessor {
         return lookUpDown;
     }
 
+    public int getDeltaAngle() {
+        return deltaAngle;
+    }
+
+    public int getDeltaLookUpDown() {
+        return deltaLookUpDown;
+    }
+
+
     @Override
     public boolean keyDown(int keycode) {
 
@@ -133,7 +142,6 @@ public class PlayerInstance implements InputProcessor {
 
         return false;
     }
-
     @Override
     public boolean keyTyped(char character) {
         return false;
