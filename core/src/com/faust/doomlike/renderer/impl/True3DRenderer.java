@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class True3DRenderer implements WorldRenderer {
+public class True3DRenderer implements WorldRenderer<MapWrapper> {
 
     private ModelBatch modelBatch;
     private PerspectiveCamera camera;
@@ -169,8 +169,9 @@ public class True3DRenderer implements WorldRenderer {
     }
 
     @Override
-    public void drawWorld(MapWrapper map, PlayerInstance playerInstance) {
-//        Gdx.gl.glViewport(0, 0, DoomLikeTestGame.GAME_WIDTH, DoomLikeTestGame.GAME_HEIGHT);r
+    @SuppressWarnings("unused")
+    public void drawWorld(float stateTime, MapWrapper map) {
+        final PlayerInstance playerInstance = map.getPlayerInstance();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         //Player movement

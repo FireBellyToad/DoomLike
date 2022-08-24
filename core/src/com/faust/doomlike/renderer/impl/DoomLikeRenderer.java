@@ -19,7 +19,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
  *
  * @author Jacopo "Faust" Buttiglieri
  */
-public class DoomLikeRenderer implements WorldRenderer {
+public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     private static final float FIELD_OF_VIEW = 200f;
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
@@ -43,9 +43,11 @@ public class DoomLikeRenderer implements WorldRenderer {
         this.shapeDrawer = new ShapeDrawer(batch, new TextureRegion(shapeRendererTexture, 0, 0, 1, 1));
     }
 
-    public void drawWorld(MapWrapper map, PlayerInstance playerInstance) {
+    public void drawWorld(float stateTime, MapWrapper map) {
         this.camera.update();
         this.batch.setProjectionMatrix(camera.combined);
+
+        final PlayerInstance playerInstance = map.getPlayerInstance();
 
         //For eachSectors, render all walls
         map.getSectors().sort((s1, s2) -> Float.compare(s2.getDepth(), s1.getDepth()));
