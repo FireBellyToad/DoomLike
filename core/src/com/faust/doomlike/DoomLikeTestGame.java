@@ -21,17 +21,11 @@ public class DoomLikeTestGame extends ApplicationAdapter {
     public static final int GAME_HEIGHT = 120;
     public static final int SCALE_FACTOR = 4;
 
-    private PlayerInstance playerInstance;
     private WorldRenderer renderer;
     private MapWrapper testMap;
 
     @Override
     public void create() {
-
-        playerInstance = new PlayerInstance();
-        Gdx.input.setInputProcessor(playerInstance);
-
-        renderer = new DoomLikeRenderer();
 
         //FIXME mock map
         MapData testMapData = TestMapFactory.getHollowMap();
@@ -41,8 +35,9 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         });
 
         testMap = new MapWrapper(testMapData);
-//        renderer = new True3DRenderer(testMap.getSectors());
+        Gdx.input.setInputProcessor(testMap.getPlayerInstance());
 
+        renderer = new DoomLikeRenderer();
     }
 
     @Override
@@ -50,8 +45,8 @@ public class DoomLikeTestGame extends ApplicationAdapter {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        playerInstance.doLogic();
-        renderer.drawWorld(testMap, playerInstance);
+        testMap.doLogic();
+        renderer.drawWorld(0f,testMap);
     }
 
     @Override
