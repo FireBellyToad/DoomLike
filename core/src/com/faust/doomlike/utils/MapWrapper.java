@@ -1,8 +1,6 @@
 package com.faust.doomlike.utils;
 
-import com.badlogic.gdx.math.Vector2;
 import com.faust.doomlike.data.MapData;
-import com.faust.doomlike.data.SectorData;
 import com.faust.doomlike.test.PlayerInstance;
 
 import java.util.ArrayList;
@@ -15,12 +13,14 @@ import java.util.List;
  */
 public class MapWrapper {
 
-    private final MapData mapData;
+    private MapData mapData;
     private final List<SectorWrapper> sectors = new ArrayList<>();
     private final PlayerInstance playerInstance;
+    private final HeaderFormatLoader mapLoader;
 
-    public MapWrapper(MapData mapData) {
-        this.mapData = mapData;
+    public MapWrapper(HeaderFormatLoader mapLoader) {
+        this.mapLoader = mapLoader;
+        this.mapData = mapLoader.loadMap();
         this.playerInstance = new PlayerInstance();
 
         this.mapData.getSectors().forEach(sd -> sectors.add(new SectorWrapper(sd)));
@@ -32,6 +32,16 @@ public class MapWrapper {
 
     public void doLogic() {
         playerInstance.doLogic();
+
+        //Reload level on enter key
+        if(playerInstance.isReloadLevel()){
+            //clear sectors and destroy map
+            sectors.clear();
+            this.mapData = mapLoader.loadMap();
+            //Reload map
+            this.mapData.getSectors().forEach(sd -> sectors.add(new SectorWrapper(sd)));
+            playerInstance.setReloadLevel(false);
+        }
     }
 
     public PlayerInstance getPlayerInstance() {

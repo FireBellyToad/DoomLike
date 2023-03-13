@@ -20,6 +20,8 @@ public class SectorData {
     private float topZ;
     private Color bottomColor;
     private Color topColor;
+    private float surfaceScale;
+    private float surfaceTexture; //TODO need refinement
 
     final private List<WallData> walls = new ArrayList<WallData>();
 
@@ -66,6 +68,22 @@ public class SectorData {
 
     public void setTopColor(Color topColor) {
         this.topColor = topColor;
+    }
+
+    public float getSurfaceScale() {
+        return surfaceScale;
+    }
+
+    public void setSurfaceScale(float surfaceScale) {
+        this.surfaceScale = surfaceScale;
+    }
+
+    public float getSurfaceTexture() {
+        return surfaceTexture;
+    }
+
+    public void setSurfaceTexture(float surfaceTexture) {
+        this.surfaceTexture = surfaceTexture;
     }
 
     public String getSectorUuid() {

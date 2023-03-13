@@ -19,6 +19,7 @@ public class PlayerInstance implements InputProcessor {
     private final Vector3 deltaPosition = Vector3.Zero.cpy();
     private int deltaAngle = 0;
     private int deltaLookUpDown = 0;
+    private boolean reloadLevel = false;
 
     public void doLogic(){
 
@@ -97,6 +98,9 @@ public class PlayerInstance implements InputProcessor {
                 //fly down
                 deltaPosition.z -= 2;
                 break;
+            case Input.Keys.ENTER:
+                reloadLevel = true;
+                break;
         }
 
         return false;
@@ -132,6 +136,14 @@ public class PlayerInstance implements InputProcessor {
 
 
         return false;
+    }
+
+    public boolean isReloadLevel() {
+        return reloadLevel;
+    }
+
+    public void setReloadLevel(boolean reloadLevel) {
+        this.reloadLevel = reloadLevel;
     }
 
     @Override

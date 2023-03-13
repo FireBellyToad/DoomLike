@@ -205,12 +205,12 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 }
 
 //                // draw vertical line to fill the wall pixel by pixel
-//                for (int yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
-//                    drawPixel(xToRender, yToRender, wall.getColor());
-//                }
+                for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
+                    drawPixel(xToRender, yToRender, wall.getColor());
+                }
 
                 // draw vertical line to fill the wall
-                drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, wall.getColor());
+//                drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, wall.getColor());
 
             }
 
@@ -255,7 +255,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
      */
     private void drawPixel(float x, float y, Color pixelColor) {
         shapeDrawer.setColor(pixelColor);
-        shapeDrawer.rectangle(x, y, 1, 1);
+        shapeDrawer.rectangle(MathUtils.round(x), MathUtils.round(y), 1, 1);
 
     }
 
