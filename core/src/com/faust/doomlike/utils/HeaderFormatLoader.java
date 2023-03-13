@@ -48,8 +48,8 @@ public class HeaderFormatLoader {
     }
 
     public MapData loadMap() {
-        //TODO improve using json files!
-        FileHandle file = Gdx.files.internal("levels/level.h");
+        //TODO improve using json files and better file handling!
+        FileHandle file = Gdx.files.absolute("E:\\Repositories\\DoomLike\\core\\assets\\levels\\level.h");
         String levelString = file.readString();
         MapData testMapData = new MapData();
 
