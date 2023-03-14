@@ -16,9 +16,9 @@ public class MapWrapper {
     private MapData mapData;
     private final List<SectorWrapper> sectors = new ArrayList<>();
     private final PlayerInstance playerInstance;
-    private final HeaderFormatLoader mapLoader;
+    private final Loader mapLoader;
 
-    public MapWrapper(HeaderFormatLoader mapLoader) {
+    public MapWrapper(Loader mapLoader) {
         this.mapLoader = mapLoader;
         this.mapData = mapLoader.loadMap();
         this.playerInstance = new PlayerInstance();

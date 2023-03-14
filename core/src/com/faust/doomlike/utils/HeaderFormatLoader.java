@@ -15,16 +15,18 @@ import java.util.*;
  *
  * @author Jacopo "Faust" Buttiglieri
  */
-public class HeaderFormatLoader {
+public class HeaderFormatLoader implements Loader{
 
-    private final static Color yellow = new Color(0xffff00ff);
-    private final static Color darkYellow = new Color(0xaaaa00ff);
-    private final static Color red = new Color(0xff0000ff);
-    private final static Color darkRed = new Color(0xaa0000ff);
-    private final static Color green = new Color(0x00ff00ff);
-    private final static Color darkGreen = new Color(0x00aa00ff);
-    private final static Color blue = new Color(0x0000ffff);
-    private final static Color darkBlue = new Color(0x0000aaff);
+    private final static List<Color> colorList = new ArrayList<Color>(){{
+        this.add(new Color(0xffff00ff));
+        this.add(new Color(0xaaaa00ff));
+        this.add(new Color(0xff0000ff));
+        this.add(new Color(0xaa0000ff));
+        this.add(new Color(0x00ff00ff));
+        this.add(new Color(0x00aa00ff));
+        this.add(new Color(0x0000ffff));
+        this.add(new Color(0x0000aaff));
+    }};
 
     private static final int SECTORS_NUMBER_INDEX = 0;
     //These indexes are calculated in a hyphotetical 0 sector map for rights offsetting
@@ -72,10 +74,13 @@ public class HeaderFormatLoader {
             SectorData sectorModel = new SectorData();
             sectorModel.setBottomZ(Float.parseFloat(sectorData[BOTTOM_Z_INDEX]));
             sectorModel.setTopZ(Float.parseFloat(sectorData[TOP_Z_INDEX]));
-            sectorModel.setBottomColor(yellow);
-            sectorModel.setTopColor(darkYellow);
+            sectorModel.setBottomColor(colorList.get(0));
+            sectorModel.setTopColor(colorList.get(1));
+
+            int c = 0;
             //Get data for each wall
             for (int w = 0; w < wallsNumber; w++) {
+                //extract wall data
                 wallData = levelStringList[WALLS_DATA_START_INDEX + sectorsNumber + w].split(" ");
 
                 sectorModel.getWalls().add(new WallData(
@@ -85,7 +90,13 @@ public class HeaderFormatLoader {
                         Float.parseFloat(wallData[3]),// FIXME skipping 4, is texterNumber
                         Float.parseFloat(wallData[5]),
                         Float.parseFloat(wallData[6]),
-                        darkRed));
+                        colorList.get(c)));
+
+                //get random color for walls
+                c++;
+                if(c == colorList.size()){
+                    c = 0;
+                }
             }
             ;
             testMapData.getSectors().add(sectorModel);

@@ -112,12 +112,12 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             //Must be not 0
             bottomLeftPoint.y = Math.round(Math.max(1, y1 * playerAngleCurrentCos + x1 * playerAngleCurrentSin));
             topLeftPoint.y = bottomLeftPoint.y;
-            // Use vertical looking angle to offset Z
+            // Use vertical looking angle to offset Z (wz[0]=S[s].z1-P.z+((P.l*wy[0])/32.0);)
             bottomLeftPoint.z = Math.round(sector.getBottomZ() - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomLeftPoint.y) / VERTICAL_LOOK_SCALE_FACTOR));
 
             // In 3D sage video, this line of code is done. However, hollowMap doesn't render as the one from his video
             // Unless sector.getBottomZ() is subtracted from sector.getTopZ()
-            // topLeftPoint.z = sector.getTopZ() + bottomLeftPoint.z;
+//          topLeftPoint.z = sector.getTopZ() + bottomLeftPoint.z;
             topLeftPoint.z = sector.getTopZ() - sector.getBottomZ() + bottomLeftPoint.z;
 
             bottomRightPoint.x = Math.round(x2 * playerAngleCurrentCos - y2 * playerAngleCurrentSin);
@@ -129,10 +129,10 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             // add this wall distance to sector depth
             sector.addToDepth(Math.round(Vector2.Zero.dst((bottomLeftPoint.x + bottomRightPoint.x) / 2, (bottomLeftPoint.y + bottomRightPoint.y) / 2)));
 
-            // Use vertical looking angle to offset Z
+            // Use vertical looking angle to offset Z ( wz[1]=S[s].z1-P.z+((P.l*wy[1])/32.0);)
             bottomRightPoint.z = Math.round(sector.getBottomZ() - playerInstance.getPosition().z + ((playerInstance.getLookUpDown() * bottomRightPoint.y) / VERTICAL_LOOK_SCALE_FACTOR));
             // In 3D sage video, this line of code is done. However, hollowMap doesn't render as the one from his video
-            // topRightPoint.z = sector.getTopZ() + bottomRightPoint.z;
+//             topRightPoint.z = sector.getTopZ() + bottomRightPoint.z;
             topRightPoint.z = sector.getTopZ() - sector.getBottomZ() + bottomRightPoint.z;
 
             // If wall is behind player
