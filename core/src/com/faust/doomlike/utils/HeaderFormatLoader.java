@@ -32,9 +32,13 @@ public class HeaderFormatLoader implements Loader{
     //These indexes are calculated in a hyphotetical 0 sector map for rights offsetting
     private static final int SECTOR_DATA_INDEX = 1;
     private static final int WALLS_DATA_START_INDEX = 2;
+    private static final int PLAYER_POSITION_INDEX = 3;
 
+    private static final int WALLS_START_INDEX = 0;
+    private static final int WALLS_END_INDEX= 1;
     private static final int BOTTOM_Z_INDEX = 2;
     private static final int TOP_Z_INDEX = 3;
+    private static final int TEXTURE_SCALE_INDEX =4;
 
     public Map<String, List<Character>> loadTexture() {
         Map<String, List<Character>> map = new HashMap<>();
@@ -63,23 +67,30 @@ public class HeaderFormatLoader implements Loader{
         //TODO file validation (?)
         //First get the number of sectors
         int sectorsNumber = Integer.parseInt(levelStringList[SECTORS_NUMBER_INDEX]);
-        int wallsNumber = Integer.parseInt(levelStringList[SECTOR_DATA_INDEX+sectorsNumber]);
+        //Temp variables
+        int sectorWallsStart;
+        int sectorWallsEnd;
         String[] sectorData;
         String[] wallData;
 
         for (int s = 0; s < sectorsNumber; s++) {
             //Get all the sector data. NOTE: we are not using wallStart and wallEnd (index 0 and 1 of the
             //sectorData array).
-            sectorData = levelStringList[SECTOR_DATA_INDEX].split(" ");
+            sectorData = levelStringList[SECTOR_DATA_INDEX+s].split(" ");
             SectorData sectorModel = new SectorData();
             sectorModel.setBottomZ(Float.parseFloat(sectorData[BOTTOM_Z_INDEX]));
             sectorModel.setTopZ(Float.parseFloat(sectorData[TOP_Z_INDEX]));
             sectorModel.setBottomColor(colorList.get(0));
             sectorModel.setTopColor(colorList.get(1));
+            sectorModel.setSurfaceTexture(Float.parseFloat(sectorData[TEXTURE_SCALE_INDEX]));
+
+            //Select which walls will be added to this sector
+            sectorWallsStart = Integer.parseInt(sectorData[WALLS_START_INDEX]);
+            sectorWallsEnd = Integer.parseInt(sectorData[WALLS_END_INDEX]);
 
             int c = 0;
             //Get data for each wall
-            for (int w = 0; w < wallsNumber; w++) {
+            for (int w = sectorWallsStart; w < sectorWallsEnd; w++) {
                 //extract wall data
                 wallData = levelStringList[WALLS_DATA_START_INDEX + sectorsNumber + w].split(" ");
 

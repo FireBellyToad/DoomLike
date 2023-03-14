@@ -21,7 +21,7 @@ public class TestMapFactory implements Loader {
     private MapData getFourCubes() {
         MapData testMapData = new MapData();
         testMapData.getSectors().add(new SectorData() {{
-            setTopZ(0);
+            setBottomZ(0);
             setTopZ(40);
             setBottomColor(red);
             setTopColor(darkRed);
@@ -31,34 +31,34 @@ public class TestMapFactory implements Loader {
             this.getWalls().add(new WallData(0, 32, 0, 0, 0,0, darkYellow));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setTopZ(0);
+            setBottomZ(0);
             setTopZ(40);
             setBottomColor(blue);
             setTopColor(darkBlue);
-            this.getWalls().add(new WallData(64, 0, 96, 0, 0,0, red));
-            this.getWalls().add(new WallData(96, 0, 96, 32, 0,0, darkRed));
             this.getWalls().add(new WallData(96, 32, 64, 32, 0,0, red));
             this.getWalls().add(new WallData(64, 32, 64, 0, 0,0, darkRed));
+            this.getWalls().add(new WallData(64, 0, 96, 0, 0,0, red));
+            this.getWalls().add(new WallData(96, 0, 96, 32, 0,0, darkRed));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setTopZ(0);
+            setBottomZ(0);
             setTopZ(40);
             setBottomColor(yellow);
             setTopColor(darkYellow);
-            this.getWalls().add(new WallData(64, 64, 96, 64, 0,0, green));
-            this.getWalls().add(new WallData(96, 64, 96, 96, 0,0, darkGreen));
             this.getWalls().add(new WallData(96, 96, 64, 96, 0,0, green));
             this.getWalls().add(new WallData(64, 96, 64, 64, 0,0, darkGreen));
+            this.getWalls().add(new WallData(64, 64, 96, 64, 0,0, green));
+            this.getWalls().add(new WallData(96, 64, 96, 96, 0,0, darkGreen));
         }});
         testMapData.getSectors().add(new SectorData() {{
-            setTopZ(0);
+            setBottomZ(0);
             setTopZ(40);
             setBottomColor(green);
             setTopColor(darkGreen);
-            this.getWalls().add(new WallData(0, 64, 32, 64, 0,0, blue));
-            this.getWalls().add(new WallData(32, 64, 32, 96, 0,0, darkBlue));
             this.getWalls().add(new WallData(32, 96, 0, 96, 0,0, blue));
             this.getWalls().add(new WallData(0, 96, 0, 64, 0,0, darkBlue));
+            this.getWalls().add(new WallData(0, 64, 32, 64, 0,0, blue));
+            this.getWalls().add(new WallData(32, 64, 32, 96, 0,0, darkBlue));
         }});
         return testMapData;
     }
@@ -114,20 +114,20 @@ public class TestMapFactory implements Loader {
             setTopZ(50);
             setBottomColor(yellow);
             setTopColor(darkYellow);
+            this.getWalls().add(new WallData(152, 168, 152, 160, 0,0, red));
+            this.getWalls().add(new WallData(152, 160, 160, 152, 0,0, darkRed));
             this.getWalls().add(new WallData(160, 152, 168, 152, 0,0, darkBlue));
             this.getWalls().add(new WallData(168, 152, 176, 160, 0,0, darkRed));
             this.getWalls().add(new WallData(176, 160, 176, 168, 0,0, red));
             this.getWalls().add(new WallData(176, 168, 168, 176, 0,0, darkRed));
             this.getWalls().add(new WallData(168, 176, 160, 176, 0,0, darkBlue));
             this.getWalls().add(new WallData(160, 176, 152, 168, 0,0, darkRed));
-            this.getWalls().add(new WallData(152, 168, 152, 160, 0,0, red));
-            this.getWalls().add(new WallData(152, 160, 160, 152, 0,0, darkRed));
         }});
         return testMapData;
     }
 
     @Override
     public MapData loadMap() {
-        return getHollowMap();
+        return getFourCubes();
     }
 }

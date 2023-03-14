@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector3;
  */
 public class PlayerInstance implements InputProcessor {
 
-    private final Vector3 position = new Vector3(70, -110, 20);
+    private final Vector3 position = new Vector3(288, 18, 30);
     private int angle = 0;
     private int lookUpDown = 0;
 
