@@ -128,6 +128,6 @@ public class TestMapFactory implements Loader {
 
     @Override
     public MapData loadMap() {
-        return getFourCubes();
+        return getHollowMap();
     }
 }
