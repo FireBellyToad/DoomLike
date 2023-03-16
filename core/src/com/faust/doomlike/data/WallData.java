@@ -16,12 +16,12 @@ public class WallData {
     final Vector2 bottomLeftPoint;
     final Vector2 bottomRightPoint;
     final Vector2 textureUV;
-    final Color color;
+    final TextureData textureData;
 
-    public WallData(float x1, float y1, float x2, float y2, float u, float v, Color wallColor) {
+    public WallData(float x1, float y1, float x2, float y2, float u, float v, TextureData textureData) {
         bottomLeftPoint = new Vector2(x1, y1);
         bottomRightPoint = new Vector2(x2, y2);
-        this.color = wallColor;
+        this.textureData = textureData;
         this.wallUuid = UUID.randomUUID().toString();
         this.textureUV = new Vector2(u, v);
     }
@@ -42,7 +42,7 @@ public class WallData {
         return wallUuid;
     }
 
-    public Color getColor() {
-        return color;
+    public TextureData getTextureData() {
+        return textureData;
     }
 }

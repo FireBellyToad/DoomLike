@@ -19,7 +19,7 @@ public class TestMapFactory implements Loader {
     private final static Color darkBlue = new Color(0x0000aaff);
 
     private MapData getFourCubes() {
-        MapData testMapData = new MapData();
+        MapData testMapData = new MapData();/*
         testMapData.getSectors().add(new SectorData() {{
             setBottomZ(0);
             setTopZ(40);
@@ -59,12 +59,12 @@ public class TestMapFactory implements Loader {
             this.getWalls().add(new WallData(0, 96, 0, 64, 0,0, darkBlue));
             this.getWalls().add(new WallData(0, 64, 32, 64, 0,0, blue));
             this.getWalls().add(new WallData(32, 64, 32, 96, 0,0, darkBlue));
-        }});
+        }});*/
         return testMapData;
     }
 
     private MapData getHollowMap() {
-        MapData testMapData = new MapData();
+        MapData testMapData = new MapData();/*
         testMapData.getSectors().add(new SectorData() {{
             setBottomZ(0);
             setTopZ(6);
@@ -122,7 +122,7 @@ public class TestMapFactory implements Loader {
             this.getWalls().add(new WallData(176, 168, 168, 176, 0,0, darkRed));
             this.getWalls().add(new WallData(168, 176, 160, 176, 0,0, darkBlue));
             this.getWalls().add(new WallData(160, 176, 152, 168, 0,0, darkRed));
-        }});
+        }});*/
         return testMapData;
     }
 

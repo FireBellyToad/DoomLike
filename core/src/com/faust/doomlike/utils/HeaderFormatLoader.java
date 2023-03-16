@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.faust.doomlike.data.MapData;
 import com.faust.doomlike.data.SectorData;
+import com.faust.doomlike.data.TextureData;
 import com.faust.doomlike.data.WallData;
 
 import java.util.*;
@@ -15,9 +16,9 @@ import java.util.*;
  *
  * @author Jacopo "Faust" Buttiglieri
  */
-public class HeaderFormatLoader implements Loader{
+public class HeaderFormatLoader implements Loader {
 
-    private final static List<Color> colorList = new ArrayList<Color>(){{
+    private final static List<Color> colorList = new ArrayList<Color>() {{
         this.add(new Color(0xffff00ff));
         this.add(new Color(0xaaaa00ff));
         this.add(new Color(0xff0000ff));
@@ -28,6 +29,9 @@ public class HeaderFormatLoader implements Loader{
         this.add(new Color(0x0000aaff));
     }};
 
+    //TODO REMOVE FROM HERE
+    private Map<String,TextureData> map;
+
     private static final int SECTORS_NUMBER_INDEX = 0;
     //These indexes are calculated in a hyphotetical 0 sector map for rights offsetting
     private static final int SECTOR_DATA_INDEX = 1;
@@ -35,20 +39,35 @@ public class HeaderFormatLoader implements Loader{
     private static final int PLAYER_POSITION_INDEX = 3;
 
     private static final int WALLS_START_INDEX = 0;
-    private static final int WALLS_END_INDEX= 1;
+    private static final int WALLS_END_INDEX = 1;
     private static final int BOTTOM_Z_INDEX = 2;
     private static final int TOP_Z_INDEX = 3;
-    private static final int TEXTURE_SCALE_INDEX =4;
+    private static final int TEXTURE_SCALE_INDEX = 4;
 
-    public Map<String, List<Character>> loadTexture() {
-        Map<String, List<Character>> map = new HashMap<>();
+    private static final int DATA_ARRAY_INDEX = 5;
+
+    public Map<String, TextureData> loadTextures() {
+        this.map = new HashMap<>();
         String name;
         FileHandle file;
-        for (int i = 0; i < 20; i++) {
-            name = "T_" + i;
-            file = Gdx.files.internal("textures/T" + name);
-            Gdx.app.log("DEBUG", file.toString());
-//            map.put(name, file.toString());
+        int endOfFile;
+        List<Float> data;
+        for (int textureNumber = 0; textureNumber < 20; textureNumber++) {
+            //Get file from name
+            name = ((textureNumber < 10) ? "T_0" : "T_") + textureNumber+".h";
+            file = Gdx.files.internal("textures/" + name);
+            String[] textureString = file.readString().split("\n");
+
+            data = new ArrayList<>();
+            //Calculate end of file
+            endOfFile = textureString.length - DATA_ARRAY_INDEX - 1;
+            //Extract data from file
+            for (int row = 0; row < endOfFile; row++) {
+                for (String substr : textureString[DATA_ARRAY_INDEX + row].split(", ")) {
+                    data.add(Float.parseFloat(substr.trim()));
+                }
+            }
+            this.map.put(name, new TextureData(16,16, data));
         }
         return map;
     }
@@ -70,13 +89,14 @@ public class HeaderFormatLoader implements Loader{
         //Temp variables
         int sectorWallsStart;
         int sectorWallsEnd;
+        int textureNumber;
         String[] sectorData;
         String[] wallData;
 
         for (int s = 0; s < sectorsNumber; s++) {
             //Get all the sector data. NOTE: we are not using wallStart and wallEnd (index 0 and 1 of the
             //sectorData array).
-            sectorData = levelStringList[SECTOR_DATA_INDEX+s].split(" ");
+            sectorData = levelStringList[SECTOR_DATA_INDEX + s].split(" ");
             SectorData sectorModel = new SectorData();
             sectorModel.setBottomZ(Float.parseFloat(sectorData[BOTTOM_Z_INDEX]));
             sectorModel.setTopZ(Float.parseFloat(sectorData[TOP_Z_INDEX]));
@@ -88,28 +108,23 @@ public class HeaderFormatLoader implements Loader{
             sectorWallsStart = Integer.parseInt(sectorData[WALLS_START_INDEX]);
             sectorWallsEnd = Integer.parseInt(sectorData[WALLS_END_INDEX]);
 
-            int c = 0;
             //Get data for each wall
             for (int w = sectorWallsStart; w < sectorWallsEnd; w++) {
                 //extract wall data
                 wallData = levelStringList[WALLS_DATA_START_INDEX + sectorsNumber + w].split(" ");
 
+                textureNumber = Integer.parseInt(wallData[4]);
+
                 sectorModel.getWalls().add(new WallData(
                         Float.parseFloat(wallData[0]),
                         Float.parseFloat(wallData[1]),
                         Float.parseFloat(wallData[2]),
-                        Float.parseFloat(wallData[3]),// FIXME skipping 4, is texterNumber
+                        Float.parseFloat(wallData[3]),
                         Float.parseFloat(wallData[5]),
                         Float.parseFloat(wallData[6]),
-                        colorList.get(c)));
-
-                //get random color for walls
-                c++;
-                if(c == colorList.size()){
-                    c = 0;
-                }
+                        map.get(((textureNumber+1 < 10) ? "T_0" : "T_") + textureNumber +".h")));
             }
-            ;
+
             testMapData.getSectors().add(sectorModel);
         }
         return testMapData;

@@ -1,5 +1,7 @@
 package com.faust.doomlike.data;
 
+import java.util.List;
+
 /**
  * Texture data class
  *
@@ -9,12 +11,12 @@ public class TextureData {
 
     private int width;
     private int height;
-    private String name;
+    private List<Float> data;
 
-    public TextureData(int width, int height, String name) {
+    public TextureData(int width, int height, List<Float> data) {
         this.width = width;
         this.height = height;
-        this.name = name;
+        this.data = data;
     }
 
     public int getWidth() {
@@ -25,7 +27,7 @@ public class TextureData {
         return height;
     }
 
-    public String getName() {
-        return name;
+    public List<Float> getData() {
+        return data;
     }
 }

@@ -27,7 +27,8 @@ public class DoomLikeTestGame extends ApplicationAdapter {
     @Override
     public void create() {
 
-        Loader loader = new HeaderFormatLoader();
+        HeaderFormatLoader loader = new HeaderFormatLoader();
+        loader.loadTextures();
 //        Loader loader = new TestMapFactory();
         testMap = new MapWrapper(loader);
         Gdx.input.setInputProcessor(testMap.getPlayerInstance());

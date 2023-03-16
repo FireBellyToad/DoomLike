@@ -7,12 +7,16 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.faust.doomlike.DoomLikeTestGame;
+import com.faust.doomlike.data.TextureData;
 import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.test.PlayerInstance;
+import com.faust.doomlike.utils.DoomLikeTextureWrapper;
 import com.faust.doomlike.utils.MapWrapper;
 import com.faust.doomlike.utils.SectorWrapper;
 import space.earlygrey.shapedrawer.ShapeDrawer;
+
+import java.util.List;
 
 /**
  * Renderer class
@@ -79,6 +83,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     private void drawAllSectorWalls(SectorWrapper sector, PlayerInstance playerInstance, boolean backfaceCulling) {
 
+        DoomLikeTextureWrapper textureWrapper;
+
         final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
         final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
 
@@ -90,11 +96,17 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
         for (WallData wall : sector.getWalls()) {
 
+
             // Place the wall in world relative to player position
             float x1 = (wall.getBottomLeftPoint().x - MathUtils.round(playerInstance.getPosition().x));
             float y1 = (wall.getBottomLeftPoint().y - MathUtils.round(playerInstance.getPosition().y));
             float x2 = (wall.getBottomRightPoint().x - MathUtils.round(playerInstance.getPosition().x));
             float y2 = (wall.getBottomRightPoint().y - MathUtils.round(playerInstance.getPosition().y));
+
+            //Initialize texture values for step calculation (needed to draw the image with perspective)
+            textureWrapper = new DoomLikeTextureWrapper(wall.getTextureData());
+            textureWrapper.setHorizontalWallStep(wall.getTextureData().getWidth()/ Math.max(0.1f,(x2-x1)) );
+            textureWrapper.setVerticalWallStep(wall.getTextureData().getHeight()/ Math.max(0.1f,(y2-y1)) );
 
             //Swap for drawing backface
             if (backfaceCulling) {
@@ -168,8 +180,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             float xStartingPosition = MathUtils.round(bottomLeftPoint.x);
 
             //Clip x
-            bottomLeftPoint.x = MathUtils.round(MathUtils.clamp(bottomLeftPoint.x, 1, DoomLikeTestGame.GAME_WIDTH));
-            bottomRightPoint.x = MathUtils.round(MathUtils.clamp(bottomRightPoint.x, 1, DoomLikeTestGame.GAME_WIDTH));
+            bottomLeftPoint.x = MathUtils.round(MathUtils.clamp(bottomLeftPoint.x, 0, DoomLikeTestGame.GAME_WIDTH));
+            bottomRightPoint.x = MathUtils.round(MathUtils.clamp(bottomRightPoint.x, 0, DoomLikeTestGame.GAME_WIDTH));
 
             //Draw x vertical lines
             for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
@@ -178,8 +190,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 float yTopPoint = MathUtils.round((topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y));
 
                 //Clip Y
-                yBottomPoint = MathUtils.round(MathUtils.clamp(yBottomPoint, 1, DoomLikeTestGame.GAME_HEIGHT));
-                yTopPoint = MathUtils.round(MathUtils.clamp(yTopPoint, 1, DoomLikeTestGame.GAME_HEIGHT));
+                yBottomPoint = MathUtils.round(MathUtils.clamp(yBottomPoint, 0, DoomLikeTestGame.GAME_HEIGHT));
+                yTopPoint = MathUtils.round(MathUtils.clamp(yTopPoint, 0, DoomLikeTestGame.GAME_HEIGHT));
 
                 //Store surface information
                 if (backfaceCulling) {
@@ -200,10 +212,20 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                     }
                 }
 
+                int rgbIndex = 0;
+                List<Float> data = textureWrapper.getTextureData().getData();
 //                // draw vertical line to fill the wall pixel by pixel
                 for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
-                    drawPixel(xToRender, yToRender, wall.getColor());
+
+                    //Remeber that RGB values are each pixel, so increase rgbIndex by 3 to get correct data
+                    drawPixel(xToRender, yToRender, data.get(rgbIndex), data.get(rgbIndex+1), data.get(rgbIndex+2));
+                    rgbIndex +=9;
+//                    rgbIndex = Math.round((textureWrapper.getTextureData().getHeight() - textureWrapper.getVerticalWallStart() - 1)* 3 * textureWrapper.getTextureData().getWidth() + textureWrapper.getHorizontalWallStart() *3);
+                    //Increse texel verticalstart by vertical step
+                    textureWrapper.setVerticalWallStart(textureWrapper.getVerticalWallStart() + textureWrapper.getVerticalWallStep());
                 }
+                //Increse texel horizontalStart by horizontal step
+                textureWrapper.setHorizontalWallStep(textureWrapper.getHorizontalWallStart() + textureWrapper.getVerticalWallStep());
 
                 // draw vertical line to fill the wall
 //                drawLine(xToRender, yBottomPoint, xToRender, yTopPoint, wall.getColor());
@@ -253,6 +275,19 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
         shapeDrawer.setColor(pixelColor);
         shapeDrawer.rectangle(MathUtils.round(x), MathUtils.round(y), 1, 1);
 
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @param r
+     * @param g
+     * @param b
+     */
+    private void drawPixel(float x, float y, float r, float g, float b) {
+        shapeDrawer.setColor(new Color(r/255,g/255,b/255,1f));
+        shapeDrawer.rectangle(MathUtils.round(x), MathUtils.round(y), 1, 1);
     }
 
     public void dispose() {
