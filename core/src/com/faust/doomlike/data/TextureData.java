@@ -1,5 +1,7 @@
 package com.faust.doomlike.data;
 
+import com.badlogic.gdx.graphics.Color;
+
 import java.util.List;
 
 /**
@@ -11,9 +13,9 @@ public class TextureData {
 
     private int width;
     private int height;
-    private List<Float> data;
+    private List<Color> data;
 
-    public TextureData(int width, int height, List<Float> data) {
+    public TextureData(int width, int height, List<Color> data) {
         this.width = width;
         this.height = height;
         this.data = data;
@@ -27,7 +29,7 @@ public class TextureData {
         return height;
     }
 
-    public List<Float> getData() {
+    public List<Color> getData() {
         return data;
     }
 }

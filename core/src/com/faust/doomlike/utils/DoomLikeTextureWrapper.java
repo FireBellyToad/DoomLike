@@ -54,4 +54,20 @@ public class DoomLikeTextureWrapper {
     public void setVerticalWallStep(float verticalWallStep) {
         this.verticalWallStep = verticalWallStep;
     }
+
+    public void addHorizontalWallStart(float toAdd) {
+        this.horizontalWallStart +=toAdd;
+    }
+
+    public void subtractHorizontalWallStart(float toSub) {
+        this.horizontalWallStart -=toSub;
+    }
+
+    public void addVerticalWallStart(float toAdd) {
+        this.verticalWallStart +=toAdd;
+    }
+
+    public void subtractVerticalWallStart(float toSub) {
+        this.verticalWallStart -=toSub;
+    }
 }

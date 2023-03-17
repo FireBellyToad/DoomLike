@@ -44,19 +44,32 @@ public class HeaderFormatLoader implements Loader {
     private static final int TOP_Z_INDEX = 3;
     private static final int TEXTURE_SCALE_INDEX = 4;
 
+    private static final int TEXTURE_HEIGHT_INDEX = 0;
+    private static final int TEXTURE_WIDTH_INDEX = 1;
     private static final int DATA_ARRAY_INDEX = 5;
 
     public Map<String, TextureData> loadTextures() {
+        //Placeholder variables
         this.map = new HashMap<>();
         String name;
         FileHandle file;
         int endOfFile;
-        List<Float> data;
+        int width;
+        int height;
+        List<Color> data;
+        Color pixelColor = new Color();
+        int rgb = 0;
+
+        //Parse file
         for (int textureNumber = 0; textureNumber < 20; textureNumber++) {
             //Get file from name
             name = ((textureNumber < 10) ? "T_0" : "T_") + textureNumber+".h";
             file = Gdx.files.internal("textures/" + name);
             String[] textureString = file.readString().split("\n");
+
+            //set width and height
+            width = Integer.parseInt(textureString[TEXTURE_WIDTH_INDEX].split(" ")[2]);
+            height = Integer.parseInt(textureString[TEXTURE_HEIGHT_INDEX].split(" ")[2]);
 
             data = new ArrayList<>();
             //Calculate end of file
@@ -64,10 +77,32 @@ public class HeaderFormatLoader implements Loader {
             //Extract data from file
             for (int row = 0; row < endOfFile; row++) {
                 for (String substr : textureString[DATA_ARRAY_INDEX + row].split(", ")) {
-                    data.add(Float.parseFloat(substr.trim()));
+                    //Map data to libGdx color
+                    switch(rgb){
+                        case 0:{
+                            pixelColor.r = Float.parseFloat(substr.trim())/255;
+                            rgb++;
+                            break;
+                        }
+                        case 1:{
+                            pixelColor.g = Float.parseFloat(substr.trim())/255;
+                            rgb++;
+                            break;
+                        }
+                        case 2: {
+                            pixelColor.b = Float.parseFloat(substr.trim())/255;
+                            pixelColor.a = 1;
+                            rgb=0;
+                            data.add(pixelColor);
+                            pixelColor = new Color();
+                            //restart
+                            break;
+                        }
+                    }
+
                 }
             }
-            this.map.put(name, new TextureData(16,16, data));
+            this.map.put(name, new TextureData(width,height, data));
         }
         return map;
     }
