@@ -25,7 +25,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     private static final float FIELD_OF_VIEW = 200f;
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
-    public  static final float RBG_CONVERSION_FACTOR = 255f ;
+    public static final float RBG_CONVERSION_FACTOR = 255f;
     private static final Float SHADE_REDUCE_FACTOR = 2f;
 
     private final SpriteBatch batch;
@@ -56,7 +56,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
         //For eachSectors, render all walls
         map.getSectors().sort((s1, s2) -> Float.compare(s2.getDepth(), s1.getDepth()));
 
-        batch.begin();
+        batch.begin();/*
         for (SectorWrapper sector : map.getSectors()) {
             //Clear distance
             sector.setDepth(0);
@@ -75,7 +75,9 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             drawAllSectorWalls(sector, playerInstance, false);
             //Find average sector distance
             sector.setDepth(Math.round(sector.getDepth() / sector.getWalls().size()));
-        }
+        }*/
+
+        floors(playerInstance);
 
 //        TextureData textrue = map.getSectors().get(0).getWalls().get(0).getTextureData();
 //        for (int y = 0; y < textrue.getHeight(); y++) {
@@ -188,7 +190,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             //Initialize texture values for step calculation (needed to draw the image with perspective)
             textureWrapper = new DoomLikeTextureWrapper(wall.getTextureData());
             //Calculate texel step. wall.getTextureUV().x  is U
-            textureWrapper.setHorizontalWallStep(wall.getTextureData().getWidth() * wall.getTextureUV().x  / (bottomRightPoint.x - bottomLeftPoint.x));
+            textureWrapper.setHorizontalWallStep(wall.getTextureData().getWidth() * wall.getTextureUV().x / (bottomRightPoint.x - bottomLeftPoint.x));
 
             //Check which avoids texture distortion on X clip
             if (bottomLeftPoint.x < 0) {
@@ -208,7 +210,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
                 //Initialize vertical texture values for step calculation (needed to draw the image with perspective)
                 //wall.getTextureUV().y  is V
-                float vertStep = wall.getTextureData().getHeight()  * wall.getTextureUV().y / (yTopPoint - yBottomPoint);
+                float vertStep = wall.getTextureData().getHeight() * wall.getTextureUV().y / (yTopPoint - yBottomPoint);
                 textureWrapper.setVerticalWallStart(0);
                 textureWrapper.setVerticalWallStep(vertStep);
 
@@ -244,7 +246,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 // draw vertical line to fill the wall pixel by pixel
                 for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
                     //Pick up pixl color for Texture data using texels
-                    pixelIndex = MathUtils.floor(textureWrapper.getHorizontalWallStart()%textureData.getWidth()) + textureData.getHeight() * (textureData.getHeight() - MathUtils.floor(textureWrapper.getVerticalWallStart() ) - 1);
+                    pixelIndex = MathUtils.floor(textureWrapper.getHorizontalWallStart() % textureData.getWidth()) + textureData.getHeight() * (textureData.getHeight() - MathUtils.floor(textureWrapper.getVerticalWallStart()) - 1);
 
                     drawPixel(xToRender, yToRender, textureData.getData().get(pixelIndex), wall.getTextureShade());
 
@@ -259,6 +261,43 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
         }
 
+    }
+
+    //3Dsage 1:1 copy
+    private void floors(PlayerInstance playerInstance) {
+        float x, y, z;
+        float floorX, floorY;
+        float xOffset = DoomLikeTestGame.GAME_WIDTH / 2;
+        float yOffset = DoomLikeTestGame.GAME_HEIGHT / 2;
+        //Clamp to remove unwanted cieling
+        float lookUpDownClamped =  Math.min(DoomLikeTestGame.GAME_HEIGHT, playerInstance.getLookUpDown());
+
+        //Using lookUpDownClamped to remove cieling
+        for (y = -yOffset; y < lookUpDownClamped; y++) {
+            for (x = -xOffset; x < xOffset; x++) {
+
+                //Calculate with up and downview
+                z = y - lookUpDownClamped;
+                floorX = x / z;
+                floorY = FIELD_OF_VIEW / z;
+
+                //Remove negative values
+                floorX = Math.max(floorX, -floorX + 1);
+                floorY = Math.max(floorY, -floorY + 1);
+
+                //Round values
+                floorX = Math.round(floorX);
+                floorY = Math.round(floorY);
+
+                //Checkerboard pattern
+                if (Math.round(floorX % 2) == Math.round(floorY % 2)) {
+                    drawPixel(x + xOffset, y + yOffset, Color.RED);
+                } else {
+                    drawPixel(x + xOffset, y + yOffset, Color.YELLOW);
+                }
+
+            }
+        }
     }
 
     /**
@@ -297,7 +336,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
      * @param pixelColor
      */
     private void drawPixel(float x, float y, final Color pixelColor) {
-        drawPixel(x,y,pixelColor,0f);
+        drawPixel(x, y, pixelColor, 0f);
 
     }
 
@@ -315,7 +354,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
         final Color shadedColor = new Color(pixelColor);
         final float reducedShade = shade / (RBG_CONVERSION_FACTOR * SHADE_REDUCE_FACTOR);
         //Clamp of the shaded pixel is done inside shadedColor.sub
-        shadedColor.sub(reducedShade,reducedShade,reducedShade, 0);
+        shadedColor.sub(reducedShade, reducedShade, reducedShade, 0);
         shapeDrawer.setColor(shadedColor);
         shapeDrawer.rectangle(MathUtils.round(x), MathUtils.round(y), 1, 1);
 
