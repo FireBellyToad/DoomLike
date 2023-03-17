@@ -23,7 +23,7 @@ public class SectorData {
     private float surfaceScale;
     private float surfaceTexture; //TODO need refinement
 
-    final private List<WallData> walls = new ArrayList<WallData>();
+    final private List<WallData> walls = new ArrayList<>();
 
     public SectorData() {
         this.sectorUuid = UUID.randomUUID().toString();

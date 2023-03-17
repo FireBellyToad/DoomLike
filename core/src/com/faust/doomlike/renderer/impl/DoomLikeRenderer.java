@@ -25,6 +25,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     private static final float FIELD_OF_VIEW = 200f;
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
+    public  static final float RBG_CONVERSION_FACTOR = 255f ;
+    private static final Float SHADE_REDUCE_FACTOR = 2f;
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
@@ -244,7 +246,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                     //Pick up pixl color for Texture data using texels
                     pixelIndex = MathUtils.floor(textureWrapper.getHorizontalWallStart()%textureData.getWidth()) + textureData.getHeight() * (textureData.getHeight() - MathUtils.floor(textureWrapper.getVerticalWallStart() ) - 1);
 
-                    drawPixel(xToRender, yToRender, textureData.getData().get(pixelIndex));
+                    drawPixel(xToRender, yToRender, textureData.getData().get(pixelIndex), wall.getTextureShade());
 
                     //Increse texel verticalstart by vertical step
                     textureWrapper.addVerticalWallStart(textureWrapper.getVerticalWallStep());
@@ -294,8 +296,27 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
      * @param y
      * @param pixelColor
      */
-    private void drawPixel(float x, float y, Color pixelColor) {
-        shapeDrawer.setColor(pixelColor);
+    private void drawPixel(float x, float y, final Color pixelColor) {
+        drawPixel(x,y,pixelColor,0f);
+
+    }
+
+    /**
+     * Draw shaded pixel
+     *
+     * @param x
+     * @param y
+     * @param pixelColor
+     * @param shade
+     */
+    private void drawPixel(float x, float y, final Color pixelColor, final Float shade) {
+
+        //Shade the pixel if needed
+        final Color shadedColor = new Color(pixelColor);
+        final float reducedShade = shade / (RBG_CONVERSION_FACTOR * SHADE_REDUCE_FACTOR);
+        //Clamp of the shaded pixel is done inside shadedColor.sub
+        shadedColor.sub(reducedShade,reducedShade,reducedShade, 0);
+        shapeDrawer.setColor(shadedColor);
         shapeDrawer.rectangle(MathUtils.round(x), MathUtils.round(y), 1, 1);
 
     }

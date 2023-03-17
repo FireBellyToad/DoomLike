@@ -2,8 +2,6 @@ package com.faust.doomlike.test;
 
 import com.badlogic.gdx.graphics.Color;
 import com.faust.doomlike.data.MapData;
-import com.faust.doomlike.data.SectorData;
-import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.utils.Loader;
 
 @Deprecated

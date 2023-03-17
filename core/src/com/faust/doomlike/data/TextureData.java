@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class TextureData {
 
-    private int width;
-    private int height;
-    private List<Color> data;
+    private final int width;
+    private final int height;
+    private final List<Color> data;
 
     public TextureData(int width, int height, List<Color> data) {
         this.width = width;

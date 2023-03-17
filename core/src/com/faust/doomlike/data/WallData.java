@@ -1,6 +1,5 @@
 package com.faust.doomlike.data;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.UUID;
@@ -17,13 +16,15 @@ public class WallData {
     final Vector2 bottomRightPoint;
     final Vector2 textureUV;
     final TextureData textureData;
+    final float textureShade;
 
-    public WallData(float x1, float y1, float x2, float y2, float u, float v, TextureData textureData) {
+    public WallData(float x1, float y1, float x2, float y2, float u, float v, float textureShade, TextureData textureData) {
         bottomLeftPoint = new Vector2(x1, y1);
         bottomRightPoint = new Vector2(x2, y2);
         this.textureData = textureData;
         this.wallUuid = UUID.randomUUID().toString();
         this.textureUV = new Vector2(u, v);
+        this.textureShade = textureShade;
     }
 
     public Vector2 getBottomLeftPoint() {
@@ -44,5 +45,9 @@ public class WallData {
 
     public TextureData getTextureData() {
         return textureData;
+    }
+
+    public float getTextureShade() {
+        return textureShade;
     }
 }

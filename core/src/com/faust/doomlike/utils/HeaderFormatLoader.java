@@ -7,8 +7,12 @@ import com.faust.doomlike.data.MapData;
 import com.faust.doomlike.data.SectorData;
 import com.faust.doomlike.data.TextureData;
 import com.faust.doomlike.data.WallData;
+import com.faust.doomlike.renderer.impl.DoomLikeRenderer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Temporary class! Should be deprecated ASAP
@@ -16,7 +20,7 @@ import java.util.*;
  *
  * @author Jacopo "Faust" Buttiglieri
  */
-public class HeaderFormatLoader implements Loader {
+public class HeaderFormatLoader /*implements Loader*/ {
 
     private final static List<Color> colorList = new ArrayList<Color>() {{
         this.add(new Color(0xffff00ff));
@@ -28,9 +32,6 @@ public class HeaderFormatLoader implements Loader {
         this.add(new Color(0x0000ffff));
         this.add(new Color(0x0000aaff));
     }};
-
-    //TODO REMOVE FROM HERE
-    private Map<String,TextureData> map;
 
     private static final int SECTORS_NUMBER_INDEX = 0;
     //These indexes are calculated in a hyphotetical 0 sector map for rights offsetting
@@ -49,51 +50,65 @@ public class HeaderFormatLoader implements Loader {
     private static final int DATA_ARRAY_INDEX = 5;
 
     public Map<String, TextureData> loadTextures() {
-        //Placeholder variables
-        this.map = new HashMap<>();
+
+        Map<String, TextureData> texturesMap = new HashMap<>();
+
+        //Placeholder empty variables
         String name;
         FileHandle file;
         int endOfFile;
-        int width;
-        int height;
+        int textureWidth;
+        int textureHeight;
         List<Color> data;
         Color pixelColor = new Color();
-        int rgb = 0;
+        int rgbCounter = 0;
+        String[] textureString;
+        float extractedColorFromString;
 
         //Parse file
         for (int textureNumber = 0; textureNumber < 20; textureNumber++) {
-            //Get file from name
-            name = ((textureNumber < 10) ? "T_0" : "T_") + textureNumber+".h";
-            file = Gdx.files.internal("textures/" + name);
-            String[] textureString = file.readString().split("\n");
 
-            //set width and height
-            width = Integer.parseInt(textureString[TEXTURE_WIDTH_INDEX].split(" ")[2]);
-            height = Integer.parseInt(textureString[TEXTURE_HEIGHT_INDEX].split(" ")[2]);
+            //Get file from name (adjusted if less than 10)
+            name = ((textureNumber < 10) ? "T_0" : "T_") + textureNumber + ".h";
+            file = Gdx.files.internal("textures/" + name);
+            textureString = file.readString().split("\n");
+
+            //set textureWidth and textureHeight
+            textureWidth = Integer.parseInt(textureString[TEXTURE_WIDTH_INDEX].split(" ")[2]);
+            textureHeight = Integer.parseInt(textureString[TEXTURE_HEIGHT_INDEX].split(" ")[2]);
 
             data = new ArrayList<>();
             //Calculate end of file
             endOfFile = textureString.length - DATA_ARRAY_INDEX - 1;
             //Extract data from file
-            for (int row = 0; row < endOfFile; row++) {
-                for (String substr : textureString[DATA_ARRAY_INDEX + row].split(", ")) {
+            for (int fileRow = 0; fileRow < endOfFile; fileRow++) {
+                //Cycle each fileRow to create a list of RGB colors
+                for (String substr : textureString[DATA_ARRAY_INDEX + fileRow].split(", ")) {
+
                     //Map data to libGdx color
-                    switch(rgb){
-                        case 0:{
-                            pixelColor.r = Float.parseFloat(substr.trim())/255;
-                            rgb++;
+                    extractedColorFromString = Float.parseFloat(substr.trim()) / DoomLikeRenderer.RBG_CONVERSION_FACTOR;
+
+                    switch (rgbCounter) {
+                        case 0: {
+                            //RED
+                            pixelColor.r = extractedColorFromString;
+                            rgbCounter++;
                             break;
                         }
-                        case 1:{
-                            pixelColor.g = Float.parseFloat(substr.trim())/255;
-                            rgb++;
+                        case 1: {
+                            //GREEN
+                            pixelColor.g = extractedColorFromString;
+                            rgbCounter++;
                             break;
                         }
                         case 2: {
-                            pixelColor.b = Float.parseFloat(substr.trim())/255;
-                            pixelColor.a = 1;
-                            rgb=0;
+                            //BLUE
+                            pixelColor.b = extractedColorFromString;
+                            pixelColor.a = 1; // Alpha must be 1
+                            rgbCounter = 0;
                             data.add(pixelColor);
+
+                            //Prepare new color for next iteration
                             pixelColor = new Color();
                             //restart
                             break;
@@ -102,12 +117,32 @@ public class HeaderFormatLoader implements Loader {
 
                 }
             }
-            this.map.put(name, new TextureData(width,height, data));
+            texturesMap.put(name, new TextureData(textureWidth, textureHeight, data));
         }
-        return map;
+        return texturesMap;
     }
 
-    public MapData loadMap() {
+    /**
+     * Map Example
+     *
+     * 2
+     * 0 4 0 40 1 4
+     * 4 8 0 40 1 4
+     * 8
+     * 256 96 448 96 0 1 1 0
+     * 448 96 448 224 0 1 1 90
+     * 448 224 256 224 0 1 1 0
+     * 256 224 256 96 0 1 1 75
+     * 96 384 128 384 0 1 1 0
+     * 128 384 128 352 0 1 1 90
+     * 128 352 96 352 0 1 1 0
+     * 96 352 96 384 0 1 1 90
+     *
+     * 288 48 30 0 0
+     *
+     * @return
+     */
+    public MapData loadMap(Map<String, TextureData> texturesMap) {
         //TODO improve using json files and better file handling!
         FileHandle file = Gdx.files.absolute("E:\\Repositories\\DoomLike\\core\\assets\\levels\\level.h");
         String levelString = file.readString();
@@ -116,9 +151,6 @@ public class HeaderFormatLoader implements Loader {
         //Organize data
         String[] levelStringList = levelString.split("\r\n");
 
-        //
-
-        //TODO file validation (?)
         //First get the number of sectors
         int sectorsNumber = Integer.parseInt(levelStringList[SECTORS_NUMBER_INDEX]);
         //Temp variables
@@ -150,14 +182,16 @@ public class HeaderFormatLoader implements Loader {
 
                 textureNumber = Integer.parseInt(wallData[4]);
 
+                //Create wall to save
                 sectorModel.getWalls().add(new WallData(
-                        Float.parseFloat(wallData[0]),
-                        Float.parseFloat(wallData[1]),
-                        Float.parseFloat(wallData[2]),
-                        Float.parseFloat(wallData[3]),
-                        Float.parseFloat(wallData[5]),
-                        Float.parseFloat(wallData[6]),
-                        map.get(((textureNumber+1 < 10) ? "T_0" : "T_") + textureNumber +".h")));
+                        Float.parseFloat(wallData[0]), // x1
+                        Float.parseFloat(wallData[1]), // y1
+                        Float.parseFloat(wallData[2]), // x2
+                        Float.parseFloat(wallData[3]), // y2
+                        Float.parseFloat(wallData[5]), // texture U
+                        Float.parseFloat(wallData[6]), // texture V
+                        Integer.parseInt(wallData[7]), // shade
+                        texturesMap.get(((textureNumber + 1 < 10) ? "T_0" : "T_") + textureNumber + ".h")));
             }
 
             testMapData.getSectors().add(sectorModel);
