@@ -185,7 +185,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
             //Initialize texture values for step calculation (needed to draw the image with perspective)
             textureWrapper = new DoomLikeTextureWrapper(wall.getTextureData());
-            textureWrapper.setHorizontalWallStep(wall.getTextureData().getWidth() / (bottomRightPoint.x - bottomLeftPoint.x));
+            //Calculate texel step. wall.getTextureUV().x  is U
+            textureWrapper.setHorizontalWallStep(wall.getTextureData().getWidth() * wall.getTextureUV().x  / (bottomRightPoint.x - bottomLeftPoint.x));
 
             //Check which avoids texture distortion on X clip
             if (bottomLeftPoint.x < 0) {
@@ -204,7 +205,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 float yTopPoint = MathUtils.round((topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y));
 
                 //Initialize vertical texture values for step calculation (needed to draw the image with perspective)
-                float vertStep = wall.getTextureData().getHeight() / (yTopPoint - yBottomPoint);
+                //wall.getTextureUV().y  is V
+                float vertStep = wall.getTextureData().getHeight()  * wall.getTextureUV().y / (yTopPoint - yBottomPoint);
                 textureWrapper.setVerticalWallStart(0);
                 textureWrapper.setVerticalWallStep(vertStep);
 
@@ -227,6 +229,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                         continue;
                     }
                 } else if (sector.getSurfaceYforXMap().containsKey(xToRender)) {
+                    //Draw surfaces
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
                         drawLine(xToRender, sector.getSurfaceYforXMap().get(xToRender), xToRender, yTopPoint, sector.getBottomColor());
                     }
@@ -239,7 +242,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 // draw vertical line to fill the wall pixel by pixel
                 for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
                     //Pick up pixl color for Texture data using texels
-                    pixelIndex = MathUtils.floor(textureWrapper.getHorizontalWallStart()) + textureData.getHeight() * (textureData.getHeight() - MathUtils.floor(textureWrapper.getVerticalWallStart()) - 1);
+                    pixelIndex = MathUtils.floor(textureWrapper.getHorizontalWallStart()%textureData.getWidth()) + textureData.getHeight() * (textureData.getHeight() - MathUtils.floor(textureWrapper.getVerticalWallStart() ) - 1);
 
                     drawPixel(xToRender, yToRender, textureData.getData().get(pixelIndex));
 
