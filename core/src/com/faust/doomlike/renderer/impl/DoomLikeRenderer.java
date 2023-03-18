@@ -27,11 +27,12 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
     public static final float RBG_CONVERSION_FACTOR = 255f;
     private static final float SHADE_REDUCE_FACTOR = 2f;
-    private static final float X_OFFSET = DoomLikeTestGame.GAME_WIDTH / 2;
-    private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT / 2;
+    private static final float X_OFFSET = DoomLikeTestGame.GAME_WIDTH / 2f;
+    private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT / 2f;
     //FIXME multiplicating for Player speed doesn't work for a speed not equal to 2.5!!
     private static final float PLAYER_OFFSET = 24 * (PlayerInstance.SPEED); //24 is a magic number found through trial and error
     private static final float LOOK_UP_DOWN_FLOOR_FACTOR = (float) (Math.PI * 2);
+    private static final float TILE_FACTOR = 7f;
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
@@ -260,6 +261,18 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     }
 
+    /**
+     *
+     * @param playerInstance
+     * @param xToRender
+     * @param wallZOffset
+     * @param yStart
+     * @param yEnd
+     * @param playerAngleCurrentCos
+     * @param playerAngleCurrentSin
+     * @param surfaceScale
+     * @param textureData
+     */
     private void drawFloor(final PlayerInstance playerInstance, final float xToRender, final float wallZOffset, float yStart, float yEnd, final float playerAngleCurrentCos, final float playerAngleCurrentSin, final float surfaceScale, final DoomLikeTextureData textureData) {
 
         //index for pixel Color
@@ -272,8 +285,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
         moveUpDownClamped = moveUpDownClamped == 0 ? 0.001f : moveUpDownClamped;
 
         //Imported surface tile
-        float tile = surfaceScale * 7f;
-
+        float tile = surfaceScale * TILE_FACTOR;
 
         //Using lookUpDownClamped to remove ceiling
         for (float y = yStart; y < yEnd; y++) {
@@ -315,7 +327,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
         pointA.x = pointA.x + intersectionFactor * (pointB.x - pointA.x);
         pointA.y = Math.max(1, pointB.y + intersectionFactor * (pointB.y - pointA.y));
-        pointA.z = pointB.z + intersectionFactor * (pointB.z - pointB.z);
+        pointA.z = pointB.z + intersectionFactor * (pointB.z - pointA.z);
 
     }
 

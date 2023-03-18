@@ -20,7 +20,7 @@ import java.util.Map;
  *
  * @author Jacopo "Faust" Buttiglieri
  */
-public class HeaderFormatLoader /*implements Loader*/ {
+public class HeaderFormatLoader {
 
     private final static List<Color> colorList = new ArrayList<Color>() {{
         this.add(new Color(0xffff00ff));
@@ -169,8 +169,6 @@ public class HeaderFormatLoader /*implements Loader*/ {
             SectorData sectorModel = new SectorData();
             sectorModel.setBottomZ(Float.parseFloat(sectorData[BOTTOM_Z_INDEX]));
             sectorModel.setTopZ(Float.parseFloat(sectorData[TOP_Z_INDEX]));
-            sectorModel.setBottomColor(colorList.get(0));
-            sectorModel.setTopColor(colorList.get(1));
 
             //Extract texture
             textureNumber = Integer.parseInt(sectorData[TEXTURE_NUMBER_INDEX]);
