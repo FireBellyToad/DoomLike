@@ -266,23 +266,31 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     //3Dsage 1:1 copy
     private void floors(PlayerInstance playerInstance) {
         float x, y, z;
-        float floorX, floorY, rotationX, rotationY;
+        float floorX, floorY, rotationX, rotationY ;
         float xOffset = DoomLikeTestGame.GAME_WIDTH / 2;
         float yOffset = DoomLikeTestGame.GAME_HEIGHT / 2;
         //Clamp to remove unwanted cieling
         float lookUpDownClamped =  Math.min(DoomLikeTestGame.GAME_HEIGHT, playerInstance.getLookUpDown());
+        float moveUpDownClamped =  playerInstance.getPosition().z/16;
+        moveUpDownClamped = moveUpDownClamped == 0 ? 0.001f: moveUpDownClamped;
         final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
         final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
+        float yStart = -yOffset;
+        float yEnd = -lookUpDownClamped;
+        if(moveUpDownClamped <0) {
+            yStart = -lookUpDownClamped;
+            yEnd = yOffset + lookUpDownClamped;
+        }
 
         //Using lookUpDownClamped to remove cieling
-        for (y = -yOffset; y < lookUpDownClamped; y++) {
+        for (y = yStart; y < yEnd; y++) {
             for (x = -xOffset; x < xOffset; x++) {
 
-                //Calculate with up and camera down up view
+                //Calculate with up and camera down up view and position
                 z = y - lookUpDownClamped;
                 z = (z == 0) ? 0.0001f : z;
-                floorX = x / z;
-                floorY = FIELD_OF_VIEW / z;
+                floorX = x / z * moveUpDownClamped;
+                floorY = FIELD_OF_VIEW / z*moveUpDownClamped;
                 //Calculate camera rotation and position
                 rotationX = (floorX * playerAngleCurrentSin) - (floorY * playerAngleCurrentCos) + (playerInstance.getPosition().y/30);
                 rotationY = (floorX * playerAngleCurrentCos) + (floorY * playerAngleCurrentSin) - (playerInstance.getPosition().x/30);
@@ -295,6 +303,12 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 //Round values
                 rotationX = Math.round(rotationX);
                 rotationY = Math.round(rotationY);
+
+                //draw only small square
+                if(rotationY <= 0 || rotationX <= 0 || rotationX >= 5 || rotationY >= 5){
+                    continue;
+                }
+
 
                 //Checkerboard pattern
                 if (Math.round(rotationX % 2) == Math.round(rotationY % 2)) {
