@@ -266,31 +266,38 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     //3Dsage 1:1 copy
     private void floors(PlayerInstance playerInstance) {
         float x, y, z;
-        float floorX, floorY;
+        float floorX, floorY, rotationX, rotationY;
         float xOffset = DoomLikeTestGame.GAME_WIDTH / 2;
         float yOffset = DoomLikeTestGame.GAME_HEIGHT / 2;
         //Clamp to remove unwanted cieling
         float lookUpDownClamped =  Math.min(DoomLikeTestGame.GAME_HEIGHT, playerInstance.getLookUpDown());
+        final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
+        final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
 
         //Using lookUpDownClamped to remove cieling
         for (y = -yOffset; y < lookUpDownClamped; y++) {
             for (x = -xOffset; x < xOffset; x++) {
 
-                //Calculate with up and downview
+                //Calculate with up and camera down up view
                 z = y - lookUpDownClamped;
+                z = (z == 0) ? 0.0001f : z;
                 floorX = x / z;
                 floorY = FIELD_OF_VIEW / z;
+                //Calculate camera rotation and position
+                rotationX = (floorX * playerAngleCurrentSin) - (floorY * playerAngleCurrentCos) + (playerInstance.getPosition().y/30);
+                rotationY = (floorX * playerAngleCurrentCos) + (floorY * playerAngleCurrentSin) - (playerInstance.getPosition().x/30);
+
 
                 //Remove negative values
-                floorX = Math.max(floorX, -floorX + 1);
-                floorY = Math.max(floorY, -floorY + 1);
+                rotationX = Math.max(rotationX, -rotationX + 1);
+                rotationY = Math.max(rotationY, -rotationY + 1);
 
                 //Round values
-                floorX = Math.round(floorX);
-                floorY = Math.round(floorY);
+                rotationX = Math.round(rotationX);
+                rotationY = Math.round(rotationY);
 
                 //Checkerboard pattern
-                if (Math.round(floorX % 2) == Math.round(floorY % 2)) {
+                if (Math.round(rotationX % 2) == Math.round(rotationY % 2)) {
                     drawPixel(x + xOffset, y + yOffset, Color.RED);
                 } else {
                     drawPixel(x + xOffset, y + yOffset, Color.YELLOW);
