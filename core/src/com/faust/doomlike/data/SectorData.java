@@ -1,6 +1,5 @@
 package com.faust.doomlike.data;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
@@ -18,10 +17,10 @@ public class SectorData {
     final private Vector2 origin = new Vector2();
     private float bottomZ;
     private float topZ;
-    private Color bottomColor;
-    private Color topColor;
+    private float surfaceScale;
+    private DoomLikeTextureData surfaceTexture;
 
-    final private List<WallData> walls = new ArrayList<WallData>();
+    final private List<WallData> walls = new ArrayList<>();
 
     public SectorData() {
         this.sectorUuid = UUID.randomUUID().toString();
@@ -52,20 +51,20 @@ public class SectorData {
         return walls;
     }
 
-    public Color getBottomColor() {
-        return bottomColor;
+    public float getSurfaceScale() {
+        return surfaceScale;
     }
 
-    public void setBottomColor(Color bottomColor) {
-        this.bottomColor = bottomColor;
+    public void setSurfaceScale(float surfaceScale) {
+        this.surfaceScale = surfaceScale;
     }
 
-    public Color getTopColor() {
-        return topColor;
+    public DoomLikeTextureData getSurfaceTexture() {
+        return surfaceTexture;
     }
 
-    public void setTopColor(Color topColor) {
-        this.topColor = topColor;
+    public void setSurfaceTexture(DoomLikeTextureData surfaceTexture) {
+        this.surfaceTexture = surfaceTexture;
     }
 
     public String getSectorUuid() {
