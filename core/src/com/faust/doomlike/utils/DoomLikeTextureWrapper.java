@@ -1,6 +1,6 @@
 package com.faust.doomlike.utils;
 
-import com.faust.doomlike.data.TextureData;
+import com.faust.doomlike.data.DoomLikeTextureData;
 
 /**
  * Texture wrapper class
@@ -9,18 +9,18 @@ import com.faust.doomlike.data.TextureData;
  */
 public class DoomLikeTextureWrapper {
 
-    final TextureData textureData;
+    final DoomLikeTextureData doomLikeTextureData;
     float horizontalWallStart;
     float horizontalWallStep;
     float verticalWallStart;
     float verticalWallStep;
 
-    public DoomLikeTextureWrapper(TextureData textureData) {
-        this.textureData = textureData;
+    public DoomLikeTextureWrapper(DoomLikeTextureData doomLikeTextureData) {
+        this.doomLikeTextureData = doomLikeTextureData;
     }
 
-    public TextureData getTextureData() {
-        return textureData;
+    public DoomLikeTextureData getTextureData() {
+        return doomLikeTextureData;
     }
 
     public float getHorizontalWallStart() {

@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.faust.doomlike.DoomLikeTestGame;
-import com.faust.doomlike.data.TextureData;
+import com.faust.doomlike.data.DoomLikeTextureData;
 import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.renderer.WorldRenderer;
 import com.faust.doomlike.test.PlayerInstance;
@@ -90,7 +90,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
         //Texture Wrapper and data placeholders
         DoomLikeTextureWrapper textureWrapper;
-        TextureData textureData;
+        DoomLikeTextureData textureData;
 
         //index for pixel Color
         int pixelIndex;
@@ -219,6 +219,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 yBottomPoint = MathUtils.round(MathUtils.clamp(yBottomPoint, 0, DoomLikeTestGame.GAME_HEIGHT));
                 yTopPoint = MathUtils.round(MathUtils.clamp(yTopPoint, 0, DoomLikeTestGame.GAME_HEIGHT));
 
+                textureData = textureWrapper.getTextureData();
                 //Store surface information
                 if (backfaceCulling) {
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
@@ -232,15 +233,13 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 } else if (sector.getSurfaceYforXMap().containsKey(xToRender)) {
                     //Draw surfaces
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-
-                        drawFloor(playerInstance, xToRender - X_OFFSET, sector.getBottomZ(), sector.getSurfaceYforXMap().get(xToRender) - Y_OFFSET, yTopPoint - Y_OFFSET, playerAngleCurrentCos, playerAngleCurrentSin);
+                        drawFloor(playerInstance, xToRender - X_OFFSET, sector.getBottomZ(), sector.getSurfaceYforXMap().get(xToRender) - Y_OFFSET, yTopPoint - Y_OFFSET, playerAngleCurrentCos, playerAngleCurrentSin, sector.getSurfaceScale(), sector.getSurfaceTexture());
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-                        drawFloor(playerInstance, xToRender - X_OFFSET, sector.getTopZ(), yBottomPoint - Y_OFFSET, sector.getSurfaceYforXMap().get(xToRender) - Y_OFFSET, playerAngleCurrentCos, playerAngleCurrentSin);
+                        drawFloor(playerInstance, xToRender - X_OFFSET, sector.getTopZ(), yBottomPoint - Y_OFFSET, sector.getSurfaceYforXMap().get(xToRender) - Y_OFFSET, playerAngleCurrentCos, playerAngleCurrentSin, sector.getSurfaceScale(), sector.getSurfaceTexture());
                     }
                 }
 
-                textureData = textureWrapper.getTextureData();
                 // draw vertical line to fill the wall pixel by pixel
                 for (float yToRender = yBottomPoint; yToRender < yTopPoint; yToRender++) {
                     //Pick up pixl color for Texture data using texels
@@ -261,8 +260,10 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     }
 
-    private void drawFloor(final PlayerInstance playerInstance, final float xToRender, final float wallZOffset, float yStart, float yEnd, final float playerAngleCurrentCos, final float playerAngleCurrentSin) {
+    private void drawFloor(final PlayerInstance playerInstance, final float xToRender, final float wallZOffset, float yStart, float yEnd, final float playerAngleCurrentCos, final float playerAngleCurrentSin, final float surfaceScale, final DoomLikeTextureData textureData) {
 
+        //index for pixel Color
+        int pixelIndex;
         float z;
         float floorX, floorY, rotationX, rotationY;
         //Clamp to remove unwanted ceiling
@@ -270,17 +271,21 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
         float moveUpDownClamped = (playerInstance.getPosition().z - wallZOffset) / Y_OFFSET;
         moveUpDownClamped = moveUpDownClamped == 0 ? 0.001f : moveUpDownClamped;
 
+        //Imported surface tile
+        float tile = surfaceScale * 7f;
+
+
         //Using lookUpDownClamped to remove ceiling
         for (float y = yStart; y < yEnd; y++) {
 
             //Calculate with up and camera down up view and position
             z = y + lookUpDownClamped;
             z = (z == 0) ? 0.0001f : z;
-            floorX = xToRender / z * moveUpDownClamped;
-            floorY = FIELD_OF_VIEW / z * moveUpDownClamped;
+            floorX = xToRender / z * moveUpDownClamped * tile;
+            floorY = FIELD_OF_VIEW / z * moveUpDownClamped * tile;
             //Calculate camera rotation and position
-            rotationX = floorX * playerAngleCurrentSin - floorY * playerAngleCurrentCos + (playerInstance.getPosition().y / PLAYER_OFFSET);
-            rotationY = floorX * playerAngleCurrentCos + floorY * playerAngleCurrentSin - (playerInstance.getPosition().x / PLAYER_OFFSET);
+            rotationX = floorX * playerAngleCurrentSin - floorY * playerAngleCurrentCos + (playerInstance.getPosition().y / PLAYER_OFFSET * tile);
+            rotationY = floorX * playerAngleCurrentCos + floorY * playerAngleCurrentSin - (playerInstance.getPosition().x / PLAYER_OFFSET * tile);
 
             //Remove negative values
             rotationX = rotationX < 0 ? (-rotationX + 1) : rotationX;
@@ -290,13 +295,11 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             rotationX = Math.round(rotationX);
             rotationY = Math.round(rotationY);
 
-            //Checkerboard pattern
-            if (Math.round(rotationX % 2) == Math.round(rotationY % 2)) {
-                drawPixel(xToRender + X_OFFSET, y + Y_OFFSET, Color.RED);
-            } else {
-                drawPixel(xToRender + X_OFFSET, y + Y_OFFSET, Color.YELLOW);
-            }
+            //Pick up pixl color for Texture data using texels
+            //3D Sage left me without a formula. Why you do dis
+            pixelIndex = MathUtils.floor(Math.round(rotationX % textureData.getWidth())) + textureData.getHeight() * (textureData.getHeight() - Math.round(rotationY % textureData.getHeight()) - 1);
 
+            drawPixel(xToRender + X_OFFSET, y + Y_OFFSET, textureData.getData().get(pixelIndex));
 
         }
     }
@@ -369,7 +372,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     @SuppressWarnings("unused")
     @Deprecated
     public void drawSimpleTexture() {
-        TextureData textrue = null;// map.getSectors().get(0).getWalls().get(0).getTextureData();
+        DoomLikeTextureData textrue = null;// map.getSectors().get(0).getWalls().get(0).getTextureData();
         for (int y = 0; y < textrue.getHeight(); y++) {
             for (int x = 0; x < textrue.getWidth(); x++) {
                 drawPixel(x, y, textrue.getData().get(x + textrue.getHeight() * (textrue.getHeight() - y - 1)));

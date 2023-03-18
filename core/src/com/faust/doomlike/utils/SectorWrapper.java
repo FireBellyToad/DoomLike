@@ -1,6 +1,6 @@
 package com.faust.doomlike.utils;
 
-import com.badlogic.gdx.graphics.Color;
+import com.faust.doomlike.data.DoomLikeTextureData;
 import com.faust.doomlike.data.SectorData;
 import com.faust.doomlike.data.WallData;
 
@@ -66,12 +66,12 @@ public class SectorWrapper {
         return sectorData.getTopZ();
     }
 
-    public Color getTopColor() {
-        return sectorData.getTopColor();
+    public float getSurfaceScale() {
+        return sectorData.getSurfaceScale();
     }
 
-    public Color getBottomColor() {
-        return sectorData.getBottomColor();
+    public DoomLikeTextureData getSurfaceTexture() {
+        return sectorData.getSurfaceTexture();
     }
 
     public String getSectorUuid() {

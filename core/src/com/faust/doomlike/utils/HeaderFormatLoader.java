@@ -5,7 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.faust.doomlike.data.MapData;
 import com.faust.doomlike.data.SectorData;
-import com.faust.doomlike.data.TextureData;
+import com.faust.doomlike.data.DoomLikeTextureData;
 import com.faust.doomlike.data.WallData;
 import com.faust.doomlike.renderer.impl.DoomLikeRenderer;
 
@@ -43,15 +43,16 @@ public class HeaderFormatLoader /*implements Loader*/ {
     private static final int WALLS_END_INDEX = 1;
     private static final int BOTTOM_Z_INDEX = 2;
     private static final int TOP_Z_INDEX = 3;
-    private static final int TEXTURE_SCALE_INDEX = 4;
+    private static final int TEXTURE_NUMBER_INDEX = 4;
+    private static final int TEXTURE_SCALE_INDEX = 5;
 
     private static final int TEXTURE_HEIGHT_INDEX = 0;
     private static final int TEXTURE_WIDTH_INDEX = 1;
     private static final int DATA_ARRAY_INDEX = 5;
 
-    public Map<String, TextureData> loadTextures() {
+    public Map<String, DoomLikeTextureData> loadTextures() {
 
-        Map<String, TextureData> texturesMap = new HashMap<>();
+        Map<String, DoomLikeTextureData> texturesMap = new HashMap<>();
 
         //Placeholder empty variables
         String name;
@@ -117,7 +118,7 @@ public class HeaderFormatLoader /*implements Loader*/ {
 
                 }
             }
-            texturesMap.put(name, new TextureData(textureWidth, textureHeight, data));
+            texturesMap.put(name, new DoomLikeTextureData(textureWidth, textureHeight, data));
         }
         return texturesMap;
     }
@@ -142,11 +143,12 @@ public class HeaderFormatLoader /*implements Loader*/ {
      *
      * @return
      */
-    public MapData loadMap(Map<String, TextureData> texturesMap) {
+    public MapData loadMap(Map<String, DoomLikeTextureData> texturesMap) {
         //TODO improve using json files and better file handling!
         FileHandle file = Gdx.files.absolute("E:\\Repositories\\DoomLike\\core\\assets\\levels\\level.h");
         String levelString = file.readString();
         MapData testMapData = new MapData();
+        String sectorTextureName;
 
         //Organize data
         String[] levelStringList = levelString.split("\r\n");
@@ -169,7 +171,14 @@ public class HeaderFormatLoader /*implements Loader*/ {
             sectorModel.setTopZ(Float.parseFloat(sectorData[TOP_Z_INDEX]));
             sectorModel.setBottomColor(colorList.get(0));
             sectorModel.setTopColor(colorList.get(1));
-            sectorModel.setSurfaceTexture(Float.parseFloat(sectorData[TEXTURE_SCALE_INDEX]));
+
+            //Extract texture
+            textureNumber = Integer.parseInt(sectorData[TEXTURE_NUMBER_INDEX]);
+            sectorTextureName = ((textureNumber < 10) ? "T_0" : "T_") + textureNumber + ".h";
+            sectorModel.setSurfaceTexture(texturesMap.get(sectorTextureName));
+
+            //Extract texture scale
+            sectorModel.setSurfaceScale(Integer.parseInt(sectorData[TEXTURE_SCALE_INDEX]));
 
             //Select which walls will be added to this sector
             sectorWallsStart = Integer.parseInt(sectorData[WALLS_START_INDEX]);

@@ -21,7 +21,7 @@ public class SectorData {
     private Color bottomColor;
     private Color topColor;
     private float surfaceScale;
-    private float surfaceTexture; //TODO need refinement
+    private DoomLikeTextureData surfaceTexture;
 
     final private List<WallData> walls = new ArrayList<>();
 
@@ -78,11 +78,11 @@ public class SectorData {
         this.surfaceScale = surfaceScale;
     }
 
-    public float getSurfaceTexture() {
+    public DoomLikeTextureData getSurfaceTexture() {
         return surfaceTexture;
     }
 
-    public void setSurfaceTexture(float surfaceTexture) {
+    public void setSurfaceTexture(DoomLikeTextureData surfaceTexture) {
         this.surfaceTexture = surfaceTexture;
     }
 

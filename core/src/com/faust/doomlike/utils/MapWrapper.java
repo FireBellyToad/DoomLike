@@ -1,7 +1,7 @@
 package com.faust.doomlike.utils;
 
 import com.faust.doomlike.data.MapData;
-import com.faust.doomlike.data.TextureData;
+import com.faust.doomlike.data.DoomLikeTextureData;
 import com.faust.doomlike.test.PlayerInstance;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class MapWrapper {
 
-    private final Map<String, TextureData> textureMap;
+    private final Map<String, DoomLikeTextureData> textureMap;
     private MapData mapData;
     private final List<SectorWrapper> sectors = new ArrayList<>();
     private final PlayerInstance playerInstance;
