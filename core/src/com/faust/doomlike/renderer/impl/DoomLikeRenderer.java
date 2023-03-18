@@ -26,7 +26,9 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     private static final float FIELD_OF_VIEW = 200f;
     private static final float VERTICAL_LOOK_SCALE_FACTOR = 32f;
     public static final float RBG_CONVERSION_FACTOR = 255f;
-    private static final Float SHADE_REDUCE_FACTOR = 2f;
+    private static final float SHADE_REDUCE_FACTOR = 2f;
+    private static final float X_OFFSET = DoomLikeTestGame.GAME_WIDTH / 2;
+    private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT /2;
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
@@ -56,7 +58,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
         //For eachSectors, render all walls
         map.getSectors().sort((s1, s2) -> Float.compare(s2.getDepth(), s1.getDepth()));
 
-        batch.begin();/*
+        batch.begin();
         for (SectorWrapper sector : map.getSectors()) {
             //Clear distance
             sector.setDepth(0);
@@ -75,16 +77,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             drawAllSectorWalls(sector, playerInstance, false);
             //Find average sector distance
             sector.setDepth(Math.round(sector.getDepth() / sector.getWalls().size()));
-        }*/
+        }
 
-        floors(playerInstance);
-
-//        TextureData textrue = map.getSectors().get(0).getWalls().get(0).getTextureData();
-//        for (int y = 0; y < textrue.getHeight(); y++) {
-//            for (int x = 0; x < textrue.getWidth(); x++) {
-//                drawPixel(x, y, textrue.getData().get( x + textrue.getHeight() * ( textrue.getHeight()  - y -1)));
-//            }
-//        }
         this.shapeDrawer.update();
         batch.end();
     }
@@ -165,17 +159,17 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             }
 
             // Calculate X and Y screen position, scaling from screen origin
-            bottomLeftPoint.x = MathUtils.round(bottomLeftPoint.x * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
-            bottomLeftPoint.y = MathUtils.round(bottomLeftPoint.z * FIELD_OF_VIEW / bottomLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
+            bottomLeftPoint.x = MathUtils.round(bottomLeftPoint.x * FIELD_OF_VIEW / bottomLeftPoint.y + X_OFFSET);
+            bottomLeftPoint.y = MathUtils.round(bottomLeftPoint.z * FIELD_OF_VIEW / bottomLeftPoint.y + Y_OFFSET);
 
-            bottomRightPoint.x = MathUtils.round(bottomRightPoint.x * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
-            bottomRightPoint.y = MathUtils.round(bottomRightPoint.z * FIELD_OF_VIEW / bottomRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
+            bottomRightPoint.x = MathUtils.round(bottomRightPoint.x * FIELD_OF_VIEW / bottomRightPoint.y + X_OFFSET);
+            bottomRightPoint.y = MathUtils.round(bottomRightPoint.z * FIELD_OF_VIEW / bottomRightPoint.y + Y_OFFSET);
 
-            topLeftPoint.x = MathUtils.round(topLeftPoint.x * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
-            topLeftPoint.y = MathUtils.round(topLeftPoint.z * FIELD_OF_VIEW / topLeftPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
+            topLeftPoint.x = MathUtils.round(topLeftPoint.x * FIELD_OF_VIEW / topLeftPoint.y + X_OFFSET);
+            topLeftPoint.y = MathUtils.round(topLeftPoint.z * FIELD_OF_VIEW / topLeftPoint.y + Y_OFFSET);
 
-            topRightPoint.x = MathUtils.round(topRightPoint.x * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_WIDTH / 2);
-            topRightPoint.y = MathUtils.round(topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + DoomLikeTestGame.GAME_HEIGHT / 2);
+            topRightPoint.x = MathUtils.round(topRightPoint.x * FIELD_OF_VIEW / topRightPoint.y + X_OFFSET);
+            topRightPoint.y = MathUtils.round(topRightPoint.z * FIELD_OF_VIEW / topRightPoint.y + Y_OFFSET);
 
             //drawWall(wx[0],wx[1],wy[0],wy[1],wy[2],wy[3])
             //Draw points if on screen
@@ -235,10 +229,14 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 } else if (sector.getSurfaceYforXMap().containsKey(xToRender)) {
                     //Draw surfaces
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-                        drawLine(xToRender, sector.getSurfaceYforXMap().get(xToRender), xToRender, yTopPoint, sector.getBottomColor());
+                        for (float yToRender = sector.getSurfaceYforXMap().get(xToRender); yToRender < yTopPoint; yToRender++) {
+                            drawPixel(xToRender, yToRender, sector.getBottomColor());
+                        }
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-                        drawLine(xToRender, yBottomPoint, xToRender, sector.getSurfaceYforXMap().get(xToRender), sector.getTopColor());
+                        for (float yToRender = yBottomPoint; yToRender < sector.getSurfaceYforXMap().get(xToRender); yToRender++) {
+                            drawPixel(xToRender, yToRender, sector.getBottomColor());
+                        }
                     }
                 }
 
@@ -264,36 +262,36 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     }
 
     //3Dsage 1:1 copy
+    @SuppressWarnings("unused")
+    @Deprecated
     private void floors(PlayerInstance playerInstance) {
         float x, y, z;
-        float floorX, floorY, rotationX, rotationY ;
-        float xOffset = DoomLikeTestGame.GAME_WIDTH / 2;
-        float yOffset = DoomLikeTestGame.GAME_HEIGHT / 2;
+        float floorX, floorY, rotationX, rotationY;
         //Clamp to remove unwanted cieling
-        float lookUpDownClamped =  Math.min(DoomLikeTestGame.GAME_HEIGHT, playerInstance.getLookUpDown());
-        float moveUpDownClamped =  playerInstance.getPosition().z/16;
-        moveUpDownClamped = moveUpDownClamped == 0 ? 0.001f: moveUpDownClamped;
+        float lookUpDownClamped = Math.min(DoomLikeTestGame.GAME_HEIGHT, playerInstance.getLookUpDown());
+        float moveUpDownClamped = playerInstance.getPosition().z / 16;
+        moveUpDownClamped = moveUpDownClamped == 0 ? 0.001f : moveUpDownClamped;
         final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
         final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
-        float yStart = -yOffset;
+        float yStart = -Y_OFFSET;
         float yEnd = -lookUpDownClamped;
-        if(moveUpDownClamped <0) {
+        if (moveUpDownClamped < 0) {
             yStart = -lookUpDownClamped;
-            yEnd = yOffset + lookUpDownClamped;
+            yEnd = Y_OFFSET + lookUpDownClamped;
         }
 
         //Using lookUpDownClamped to remove cieling
         for (y = yStart; y < yEnd; y++) {
-            for (x = -xOffset; x < xOffset; x++) {
+            for (x = -X_OFFSET; x < X_OFFSET; x++) {
 
                 //Calculate with up and camera down up view and position
                 z = y - lookUpDownClamped;
                 z = (z == 0) ? 0.0001f : z;
                 floorX = x / z * moveUpDownClamped;
-                floorY = FIELD_OF_VIEW / z*moveUpDownClamped;
+                floorY = FIELD_OF_VIEW / z * moveUpDownClamped;
                 //Calculate camera rotation and position
-                rotationX = (floorX * playerAngleCurrentSin) - (floorY * playerAngleCurrentCos) + (playerInstance.getPosition().y/30);
-                rotationY = (floorX * playerAngleCurrentCos) + (floorY * playerAngleCurrentSin) - (playerInstance.getPosition().x/30);
+                rotationX = (floorX * playerAngleCurrentSin) - (floorY * playerAngleCurrentCos) + (playerInstance.getPosition().y / 30);
+                rotationY = (floorX * playerAngleCurrentCos) + (floorY * playerAngleCurrentSin) - (playerInstance.getPosition().x / 30);
 
 
                 //Remove negative values
@@ -305,16 +303,16 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 rotationY = Math.round(rotationY);
 
                 //draw only small square
-                if(rotationY <= 0 || rotationX <= 0 || rotationX >= 5 || rotationY >= 5){
+                if (rotationY <= 0 || rotationX <= 0 || rotationX >= 5 || rotationY >= 5) {
                     continue;
                 }
 
 
                 //Checkerboard pattern
                 if (Math.round(rotationX % 2) == Math.round(rotationY % 2)) {
-                    drawPixel(x + xOffset, y + yOffset, Color.RED);
+                    drawPixel(x + X_OFFSET, y + Y_OFFSET, Color.RED);
                 } else {
-                    drawPixel(x + xOffset, y + yOffset, Color.YELLOW);
+                    drawPixel(x + X_OFFSET, y + Y_OFFSET, Color.YELLOW);
                 }
 
             }
@@ -384,6 +382,17 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     public void dispose() {
         batch.dispose();
         shapeRendererTexture.dispose();
+    }
+
+    @SuppressWarnings("unused")
+    @Deprecated
+    public void drawSimpleTexture() {
+        TextureData textrue = null;// map.getSectors().get(0).getWalls().get(0).getTextureData();
+        for (int y = 0; y < textrue.getHeight(); y++) {
+            for (int x = 0; x < textrue.getWidth(); x++) {
+                drawPixel(x, y, textrue.getData().get(x + textrue.getHeight() * (textrue.getHeight() - y - 1)));
+            }
+        }
     }
 
 }
