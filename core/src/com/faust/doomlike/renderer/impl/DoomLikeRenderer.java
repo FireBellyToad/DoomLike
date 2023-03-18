@@ -28,7 +28,10 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     public static final float RBG_CONVERSION_FACTOR = 255f;
     private static final float SHADE_REDUCE_FACTOR = 2f;
     private static final float X_OFFSET = DoomLikeTestGame.GAME_WIDTH / 2;
-    private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT /2;
+    private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT / 2;
+    //FIXME multiplicating for Player speed doesn't work for a speed not equal to 2.5!!
+    private static final float PLAYER_OFFSET = 24 * (PlayerInstance.SPEED); //24 is a magic number found through trial and error
+    private static final float LOOK_UP_DOWN_FLOOR_FACTOR = (float) (Math.PI * 2);
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
@@ -199,8 +202,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             for (float xToRender = bottomLeftPoint.x; xToRender < bottomRightPoint.x; xToRender++) {
 
                 // Get the Y start and end point (0.5 is used for rounding)
-                float yBottomPoint = MathUtils.round((bottomPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + bottomLeftPoint.y));
-                float yTopPoint = MathUtils.round((topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y));
+                float yBottomPoint = MathUtils.round((bottomPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + bottomLeftPoint.y)); //y1
+                float yTopPoint = MathUtils.round((topPointYDistance * (xToRender - xStartingPosition + 0.5f) / xDistance + topLeftPoint.y)); //y2
 
                 //Initialize vertical texture values for step calculation (needed to draw the image with perspective)
                 //wall.getTextureUV().y  is V
@@ -229,14 +232,11 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
                 } else if (sector.getSurfaceYforXMap().containsKey(xToRender)) {
                     //Draw surfaces
                     if (SectorWrapper.SurfaceShownEnum.BOTTOM.equals(sector.getSurfaceToShow())) {
-                        for (float yToRender = sector.getSurfaceYforXMap().get(xToRender); yToRender < yTopPoint; yToRender++) {
-                            drawPixel(xToRender, yToRender, sector.getBottomColor());
-                        }
+
+                        drawFloor(playerInstance, xToRender - X_OFFSET, sector.getBottomZ(), sector.getSurfaceYforXMap().get(xToRender) - Y_OFFSET, yTopPoint - Y_OFFSET, playerAngleCurrentCos, playerAngleCurrentSin);
                     }
                     if (SectorWrapper.SurfaceShownEnum.TOP.equals(sector.getSurfaceToShow())) {
-                        for (float yToRender = yBottomPoint; yToRender < sector.getSurfaceYforXMap().get(xToRender); yToRender++) {
-                            drawPixel(xToRender, yToRender, sector.getBottomColor());
-                        }
+                        drawFloor(playerInstance, xToRender - X_OFFSET, sector.getTopZ(), yBottomPoint - Y_OFFSET, sector.getSurfaceYforXMap().get(xToRender) - Y_OFFSET, playerAngleCurrentCos, playerAngleCurrentSin);
                     }
                 }
 
@@ -261,61 +261,43 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
 
     }
 
-    //3Dsage 1:1 copy
-    @SuppressWarnings("unused")
-    @Deprecated
-    private void floors(PlayerInstance playerInstance) {
-        float x, y, z;
+    private void drawFloor(final PlayerInstance playerInstance, final float xToRender, final float wallZOffset, float yStart, float yEnd, final float playerAngleCurrentCos, final float playerAngleCurrentSin) {
+
+        float z;
         float floorX, floorY, rotationX, rotationY;
-        //Clamp to remove unwanted cieling
-        float lookUpDownClamped = Math.min(DoomLikeTestGame.GAME_HEIGHT, playerInstance.getLookUpDown());
-        float moveUpDownClamped = playerInstance.getPosition().z / 16;
+        //Clamp to remove unwanted ceiling
+        float lookUpDownClamped = Math.min(DoomLikeTestGame.GAME_HEIGHT, -playerInstance.getLookUpDown() * LOOK_UP_DOWN_FLOOR_FACTOR);
+        float moveUpDownClamped = (playerInstance.getPosition().z - wallZOffset) / Y_OFFSET;
         moveUpDownClamped = moveUpDownClamped == 0 ? 0.001f : moveUpDownClamped;
-        final float playerAngleCurrentCos = MathUtils.cosDeg(playerInstance.getAngle());
-        final float playerAngleCurrentSin = MathUtils.sinDeg(playerInstance.getAngle());
-        float yStart = -Y_OFFSET;
-        float yEnd = -lookUpDownClamped;
-        if (moveUpDownClamped < 0) {
-            yStart = -lookUpDownClamped;
-            yEnd = Y_OFFSET + lookUpDownClamped;
-        }
 
-        //Using lookUpDownClamped to remove cieling
-        for (y = yStart; y < yEnd; y++) {
-            for (x = -X_OFFSET; x < X_OFFSET; x++) {
+        //Using lookUpDownClamped to remove ceiling
+        for (float y = yStart; y < yEnd; y++) {
 
-                //Calculate with up and camera down up view and position
-                z = y - lookUpDownClamped;
-                z = (z == 0) ? 0.0001f : z;
-                floorX = x / z * moveUpDownClamped;
-                floorY = FIELD_OF_VIEW / z * moveUpDownClamped;
-                //Calculate camera rotation and position
-                rotationX = (floorX * playerAngleCurrentSin) - (floorY * playerAngleCurrentCos) + (playerInstance.getPosition().y / 30);
-                rotationY = (floorX * playerAngleCurrentCos) + (floorY * playerAngleCurrentSin) - (playerInstance.getPosition().x / 30);
+            //Calculate with up and camera down up view and position
+            z = y + lookUpDownClamped;
+            z = (z == 0) ? 0.0001f : z;
+            floorX = xToRender / z * moveUpDownClamped;
+            floorY = FIELD_OF_VIEW / z * moveUpDownClamped;
+            //Calculate camera rotation and position
+            rotationX = floorX * playerAngleCurrentSin - floorY * playerAngleCurrentCos + (playerInstance.getPosition().y / PLAYER_OFFSET);
+            rotationY = floorX * playerAngleCurrentCos + floorY * playerAngleCurrentSin - (playerInstance.getPosition().x / PLAYER_OFFSET);
 
+            //Remove negative values
+            rotationX = rotationX < 0 ? (-rotationX + 1) : rotationX;
+            rotationY = rotationY < 0 ? (-rotationY + 1) : rotationY;
 
-                //Remove negative values
-                rotationX = Math.max(rotationX, -rotationX + 1);
-                rotationY = Math.max(rotationY, -rotationY + 1);
+            //Round values
+            rotationX = Math.round(rotationX);
+            rotationY = Math.round(rotationY);
 
-                //Round values
-                rotationX = Math.round(rotationX);
-                rotationY = Math.round(rotationY);
-
-                //draw only small square
-                if (rotationY <= 0 || rotationX <= 0 || rotationX >= 5 || rotationY >= 5) {
-                    continue;
-                }
-
-
-                //Checkerboard pattern
-                if (Math.round(rotationX % 2) == Math.round(rotationY % 2)) {
-                    drawPixel(x + X_OFFSET, y + Y_OFFSET, Color.RED);
-                } else {
-                    drawPixel(x + X_OFFSET, y + Y_OFFSET, Color.YELLOW);
-                }
-
+            //Checkerboard pattern
+            if (Math.round(rotationX % 2) == Math.round(rotationY % 2)) {
+                drawPixel(xToRender + X_OFFSET, y + Y_OFFSET, Color.RED);
+            } else {
+                drawPixel(xToRender + X_OFFSET, y + Y_OFFSET, Color.YELLOW);
             }
+
+
         }
     }
 

@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author Jacopo "Faust" Buttiglieri
  */
 public class PlayerInstance implements InputProcessor {
+    public static final float SPEED = 2.5F;
 
     private final Vector3 position = new Vector3(288, 18, 30);
     private int angle = 0;
@@ -50,8 +51,8 @@ public class PlayerInstance implements InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
 
-        int deltaX = (int) (MathUtils.sinDeg(angle) * 5);
-        int deltaY = (int) (MathUtils.cosDeg(angle) * 5);
+        int deltaX = (int) (MathUtils.sinDeg(angle) * SPEED);
+        int deltaY = (int) (MathUtils.cosDeg(angle) * SPEED);
 
         switch (keycode) {
             case Input.Keys.W:
