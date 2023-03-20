@@ -29,9 +29,12 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     private static final float SHADE_REDUCE_FACTOR = 2f;
     private static final float X_OFFSET = DoomLikeTestGame.GAME_WIDTH / 2f;
     private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT / 2f;
-    //FIXME multiplicating for Player speed doesn't work for a speed not equal to 2.5!!
-    private static final float PLAYER_OFFSET = 24 * (PlayerInstance.SPEED); //24 is a magic number found through trial and error
+
+    //24 and 2.5f are magic numbers found bt trail and error
+    private static final float SURFACE_MOVEMENT_OFFSET = 24 * (PlayerInstance.SPEED) * (2.5f / (PlayerInstance.SPEED));
+    //3DSage suggested 6.2f value, which is pretty similar to PI (3.14) * 2. Using Math.PI for increased precision
     private static final float LOOK_UP_DOWN_FLOOR_FACTOR = (float) (Math.PI * 2);
+    //7f is magic number suggested by 3DSage
     private static final float TILE_FACTOR = 7f;
 
     private final SpriteBatch batch;
@@ -262,7 +265,6 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     }
 
     /**
-     *
      * @param playerInstance
      * @param xToRender
      * @param wallZOffset
@@ -296,8 +298,8 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             floorX = xToRender / z * moveUpDownClamped * tile;
             floorY = FIELD_OF_VIEW / z * moveUpDownClamped * tile;
             //Calculate camera rotation and position
-            rotationX = floorX * playerAngleCurrentSin - floorY * playerAngleCurrentCos + (playerInstance.getPosition().y / PLAYER_OFFSET * tile);
-            rotationY = floorX * playerAngleCurrentCos + floorY * playerAngleCurrentSin - (playerInstance.getPosition().x / PLAYER_OFFSET * tile);
+            rotationX = floorX * playerAngleCurrentSin - floorY * playerAngleCurrentCos + (playerInstance.getPosition().y / SURFACE_MOVEMENT_OFFSET * tile);
+            rotationY = floorX * playerAngleCurrentCos + floorY * playerAngleCurrentSin - (playerInstance.getPosition().x / SURFACE_MOVEMENT_OFFSET * tile);
 
             //Remove negative values
             rotationX = rotationX < 0 ? (-rotationX + 1) : rotationX;

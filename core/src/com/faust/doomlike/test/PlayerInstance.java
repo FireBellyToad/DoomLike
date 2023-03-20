@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector3;
  * @author Jacopo "Faust" Buttiglieri
  */
 public class PlayerInstance implements InputProcessor {
-    public static final float SPEED = 2.5F;
+    public static final float SPEED = 5f;
 
     private final Vector3 position = new Vector3(288, 18, 30);
     private int angle = 0;
