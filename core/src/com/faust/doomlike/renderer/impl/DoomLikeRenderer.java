@@ -30,7 +30,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
     private static final float X_OFFSET = DoomLikeTestGame.GAME_WIDTH / 2f;
     private static final float Y_OFFSET = DoomLikeTestGame.GAME_HEIGHT / 2f;
 
-    //24 and 2.5f are magic numbers found bt trail and error
+    //24 and 2.5f are magic numbers found bt trial and error
     private static final float SURFACE_MOVEMENT_OFFSET = 24 * (PlayerInstance.SPEED) * (2.5f / (PlayerInstance.SPEED));
     //3DSage suggested 6.2f value, which is pretty similar to PI (3.14) * 2. Using Math.PI for increased precision
     private static final float LOOK_UP_DOWN_FLOOR_FACTOR = (float) (Math.PI * 2);
