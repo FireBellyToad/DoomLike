@@ -72,7 +72,7 @@ public class HeaderFormatLoader {
             //Get file from name (adjusted if less than 10)
             name = ((textureNumber < 10) ? "T_0" : "T_") + textureNumber + ".h";
             file = Gdx.files.internal("textures/" + name);
-            textureString = file.readString().split("\n");
+            textureString = file.readString().split("\r\n");
 
             //set textureWidth and textureHeight
             textureWidth = Integer.parseInt(textureString[TEXTURE_WIDTH_INDEX].split(" ")[2]);
