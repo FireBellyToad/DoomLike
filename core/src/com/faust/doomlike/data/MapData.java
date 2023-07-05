@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class MapData {
 
-    final private List<SectorData> sectors = new ArrayList<SectorData>();
+    final private List<SectorData> sectors = new ArrayList<>();
 
     public List<SectorData> getSectors() {
         return sectors;
