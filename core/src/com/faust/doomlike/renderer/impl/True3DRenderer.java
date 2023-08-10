@@ -1,11 +1,14 @@
 package com.faust.doomlike.renderer.impl;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
@@ -51,7 +54,7 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
         camera.position.set(70, -110, 20);
         camera.rotate(Vector3.X,90);
         camera.near = 1f;
-        camera.far = 300f;
+        camera.far = 600f;
         camera.update();
 
         // Init all the model
@@ -87,13 +90,20 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
             for (WallData wallData : sector.getWalls()) {
 
                 //Create Wall mesh
-                material = new Material(ColorAttribute.createDiffuse(wallData.getColor()));
+                material = new Material(TextureAttribute.createDiffuse(wallData.getTextureData().toGdxTexture()));
 
-                meshPartBuilder = modelBuilder.part(wallData.getWallUuid(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
+                meshPartBuilder = modelBuilder.part(wallData.getWallUuid(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal  | VertexAttributes.Usage.Generic | VertexAttributes.Usage.TextureCoordinates, material );
+
                 bottomLeftCorner = new VertexInfo().setPos(wallData.getBottomLeftPoint().x, wallData.getBottomLeftPoint().y, sector.getBottomZ()).setNor(0, 0, 1);
                 bottomRightCorner = new VertexInfo().setPos(wallData.getBottomRightPoint().x, wallData.getBottomRightPoint().y, sector.getBottomZ()).setNor(0, 0, 1);
                 topRightCorner = new VertexInfo().setPos(wallData.getBottomRightPoint().x, wallData.getBottomRightPoint().y, sector.getTopZ()).setNor(0, 0, 1);
                 topLeftCorner = new VertexInfo().setPos(wallData.getBottomLeftPoint().x, wallData.getBottomLeftPoint().y, sector.getTopZ()).setNor(0, 0, 1);
+
+                //Map uv
+                bottomLeftCorner.setUV(0,0);
+                bottomRightCorner.setUV(1*wallData.getTextureUV().x,0);
+                topRightCorner.setUV(1*wallData.getTextureUV().x,1* wallData.getTextureUV().y);
+                topLeftCorner.setUV(0,1* wallData.getTextureUV().y);
 
                 meshPartBuilder.rect(bottomLeftCorner, bottomRightCorner, topRightCorner, topLeftCorner);
 
@@ -151,7 +161,8 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
 
         //Generate surface mesh
         for (int surf = 0; surf < triangulationResult.size; surf += 3) {
-            material = new Material(ColorAttribute.createDiffuse(isBottom ? sector.getBottomColor() : sector.getTopColor()));
+//            material = new Material(ColorAttribute.createDiffuse(isBottom ? sector.getBottomColor() : sector.getTopColor()));
+            material = new Material(ColorAttribute.createDiffuse(isBottom ? Color.VIOLET : Color.BROWN));
             meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + idSuffix, GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
 
             point1 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf)).x, surfaceVertexPairsList.get(triangulationResult.get(surf)).y, z).setNor(0, 0, 1);
