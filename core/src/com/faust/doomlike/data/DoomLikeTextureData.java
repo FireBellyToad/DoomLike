@@ -57,6 +57,7 @@ public class DoomLikeTextureData {
                 }
             }
             gdxTexture = new Texture(pixmap);
+//            gdxTexture = new Texture(Gdx.app.getFiles().internal("badlogic.jpg"));
             gdxTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
             gdxTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             pixmap.dispose();

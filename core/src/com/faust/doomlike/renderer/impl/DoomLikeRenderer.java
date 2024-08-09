@@ -309,7 +309,7 @@ public class DoomLikeRenderer implements WorldRenderer<MapWrapper> {
             rotationX = Math.round(rotationX);
             rotationY = Math.round(rotationY);
 
-            //Pick up pixl color for Texture data using texels
+            //Pick up pixel color for Texture data using texels
             //3D Sage left me without a formula. Why you do dis
             pixelIndex = MathUtils.floor(Math.round(rotationX % textureData.getWidth())) + textureData.getHeight() * (textureData.getHeight() - Math.round(rotationY % textureData.getHeight()) - 1);
 

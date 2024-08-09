@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.faust.doomlike.renderer.WorldRenderer;
+import com.faust.doomlike.renderer.impl.DoomLikeRenderer;
 import com.faust.doomlike.utils.HeaderFormatLoader;
 import com.faust.doomlike.renderer.impl.True3DRenderer;
 import com.faust.doomlike.utils.MapWrapper;

@@ -1,11 +1,9 @@
 package com.faust.doomlike.renderer.impl;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
@@ -52,7 +50,7 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
         //Camera is player
         camera = new PerspectiveCamera(45, DoomLikeTestGame.GAME_WIDTH, DoomLikeTestGame.GAME_HEIGHT);
         camera.position.set(70, -110, 20);
-        camera.rotate(Vector3.X,90);
+        camera.rotate(Vector3.X, 90);
         camera.near = 1f;
         camera.far = 600f;
         camera.update();
@@ -92,7 +90,7 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
                 //Create Wall mesh
                 material = new Material(TextureAttribute.createDiffuse(wallData.getTextureData().toGdxTexture()));
 
-                meshPartBuilder = modelBuilder.part(wallData.getWallUuid(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal  | VertexAttributes.Usage.Generic | VertexAttributes.Usage.TextureCoordinates, material );
+                meshPartBuilder = modelBuilder.part(wallData.getWallUuid(), GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.Generic | VertexAttributes.Usage.TextureCoordinates, material);
 
                 bottomLeftCorner = new VertexInfo().setPos(wallData.getBottomLeftPoint().x, wallData.getBottomLeftPoint().y, sector.getBottomZ()).setNor(0, 0, 1);
                 bottomRightCorner = new VertexInfo().setPos(wallData.getBottomRightPoint().x, wallData.getBottomRightPoint().y, sector.getBottomZ()).setNor(0, 0, 1);
@@ -100,10 +98,10 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
                 topLeftCorner = new VertexInfo().setPos(wallData.getBottomLeftPoint().x, wallData.getBottomLeftPoint().y, sector.getTopZ()).setNor(0, 0, 1);
 
                 //Map uv
-                bottomLeftCorner.setUV(0,0);
-                bottomRightCorner.setUV(1*wallData.getTextureUV().x,0);
-                topRightCorner.setUV(1*wallData.getTextureUV().x,1* wallData.getTextureUV().y);
-                topLeftCorner.setUV(0,1* wallData.getTextureUV().y);
+                topLeftCorner.setUV(0, 0);
+                topRightCorner.setUV(1 * wallData.getTextureUV().x, 0);
+                bottomRightCorner.setUV(1 * wallData.getTextureUV().x, 1 * wallData.getTextureUV().y);
+                bottomLeftCorner.setUV(0, 1 * wallData.getTextureUV().y);
 
                 meshPartBuilder.rect(bottomLeftCorner, bottomRightCorner, topRightCorner, topLeftCorner);
 
@@ -159,15 +157,22 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
 
         ShortArray triangulationResult = triangulator.computeTriangles(flatSurfaceVertexesArray);
 
+        int uPlaceholder = 0;
+        int vPlaceholder = 0;
+
         //Generate surface mesh
         for (int surf = 0; surf < triangulationResult.size; surf += 3) {
-//            material = new Material(ColorAttribute.createDiffuse(isBottom ? sector.getBottomColor() : sector.getTopColor()));
-            material = new Material(ColorAttribute.createDiffuse(isBottom ? Color.VIOLET : Color.BROWN));
-            meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + idSuffix, GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, material);
+            material = new Material(TextureAttribute.createDiffuse(sector.getSurfaceTexture().toGdxTexture()));
+            meshPartBuilder = modelBuilder.part(sector.getSectorUuid() + idSuffix, GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates, material);
 
             point1 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf)).x, surfaceVertexPairsList.get(triangulationResult.get(surf)).y, z).setNor(0, 0, 1);
             point2 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf + 1)).x, surfaceVertexPairsList.get(triangulationResult.get(surf + 1)).y, z).setNor(0, 0, 1);
             point3 = new VertexInfo().setPos(surfaceVertexPairsList.get(triangulationResult.get(surf + 2)).x, surfaceVertexPairsList.get(triangulationResult.get(surf + 2)).y, z).setNor(0, 0, 1);
+
+            //Map uv
+            point1.setUV(Math.floorMod(uPlaceholder, 2) / sector.getSurfaceScale(), Math.floorMod(vPlaceholder + 1, 2) / sector.getSurfaceScale());
+            point2.setUV(Math.floorMod(uPlaceholder, 2) / sector.getSurfaceScale(), Math.floorMod(vPlaceholder, 2) / sector.getSurfaceScale());
+            point3.setUV(Math.floorMod(uPlaceholder + 1, 2) / sector.getSurfaceScale(), Math.floorMod(vPlaceholder, 2) / sector.getSurfaceScale());
 
             if (isBottom) {
                 meshPartBuilder.triangle(point1, point2, point3);
@@ -175,8 +180,10 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
                 meshPartBuilder.triangle(point3, point2, point1);
             }
 
-        }
+            uPlaceholder++;
+            vPlaceholder++;
 
+        }
     }
 
     @Override
@@ -188,10 +195,10 @@ public class True3DRenderer implements WorldRenderer<MapWrapper> {
         //Player movement
         camera.position.set(playerInstance.getPosition());
         //For looking right and left, must rotate on Z axis
-        camera.rotate(Vector3.Z,-playerInstance.getDeltaAngle());
+        camera.rotate(Vector3.Z, -playerInstance.getDeltaAngle());
         //For looking up down, must rotate on the "perpendicular" vector for the direction normal (ignoring z)
         Vector3 normal = camera.direction.nor();
-        camera.rotate(-playerInstance.getDeltaLookUpDown(),normal.y,-normal.x,0);
+        camera.rotate(-playerInstance.getDeltaLookUpDown(), normal.y, -normal.x, 0);
         camera.update();
 
         modelBatch.begin(camera);
